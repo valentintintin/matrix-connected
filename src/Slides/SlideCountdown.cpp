@@ -26,7 +26,6 @@ void SlideCountdown::restart(uint64_t millisToCount) {
 
 void SlideCountdown::stop() {
     running = false;
-    timer.restart();
 }
 
 String SlideCountdown::getText() {
@@ -37,6 +36,7 @@ String SlideCountdown::getText() {
             millisToString(millisToCount - (lastTime - initTime), &timeString);
         } else {
             stop();
+            timer.restart();
             timeString.remove(0, timeString.length());
             timeString.concat("Fin !");
         }
