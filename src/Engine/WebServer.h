@@ -3,7 +3,8 @@
 
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-//#include <ESP8266WebServer.h>
+#include <Slides/SlideTimer.h>
+#include <Slides/SlideCountdown.h>
 #include "Screen.h"
 
 class WebServer {
@@ -16,6 +17,9 @@ public:
     void begin();
 
 private:
+    SlideTimer slideTimer;
+    SlideCountdown slideCountdown;
+
     AsyncWebServer server;
 };
 

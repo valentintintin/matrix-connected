@@ -64,7 +64,11 @@ bool Screen::refresh() {
 }
 
 void Screen::setMainSlide(Slide *slide) {
-    mainSlide = slide;
+    if (slide == nullptr && fallBackSlide != nullptr) {
+        mainSlide = fallBackSlide;
+    } else {
+        mainSlide = slide;
+    }
 }
 
 const Slide *Screen::getMainSlide() {
