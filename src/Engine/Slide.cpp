@@ -5,7 +5,9 @@ Slide::Slide(Screen *screen) : screen(screen), zone(PPmax72xxAnimate(&screen->ma
 }
 
 bool Slide::show() {
-    return zone.Animate(false);
+    bool animate = zone.Animate(false);
+    showRaw();
+    return animate;
 }
 
 void Slide::setZone(uint16_t startX, uint16_t widthX, textEffect_t textEffect) {

@@ -1,7 +1,17 @@
 #include "Screen.h"
 #include "Slide.h"
 
-Screen::Screen(byte csPin, byte hDisplays) : matrix(PPMax72xxPanel(csPin, hDisplays, 1)) {
+#include <NonBlockingRtttl.h>
+
+Screen::Screen(byte csPin, byte hDisplays, byte soundPin, byte ledPin) : matrix(PPMax72xxPanel(csPin, hDisplays, 1)),
+                                                                         soundPin(soundPin), ledPin(ledPin) {
+    if (soundPin != 255) {
+        pinMode(soundPin, OUTPUT);
+    }
+    if (ledPin != 255) {
+        pinMode(ledPin, OUTPUT);
+    }
+
     matrix.setRotation(0, 3);
     matrix.setRotation(1, 3);
     matrix.setRotation(2, 3);
@@ -19,7 +29,11 @@ Screen::Screen(byte csPin, byte hDisplays) : matrix(PPMax72xxPanel(csPin, hDispl
 }
 
 void Screen::addSlide(Slide *slide) {
-    slides.push(slide);
+    if (enabled) {
+        slides.push(slide);
+    } else {
+        delete slide;
+    }
 }
 
 bool Screen::refresh() {
@@ -58,6 +72,10 @@ bool Screen::refresh() {
             matrix.write();
             delay(10);
         }
+
+        if (!rtttl::done()) {
+            rtttl::play();
+        }
     }
 
     return shouldRefresh;
@@ -76,9 +94,14 @@ const Slide *Screen::getMainSlide() {
 }
 
 void Screen::setState(bool on) {
-    matrix.setIntensity(0);
-    matrix.fillScreen(LOW);
-    matrix.write();
+    if (!on && rtttl::isPlaying()) {
+        rtttl::stop();
+    }
+    if ((!on && enabled) || (!enabled && on)) {
+        matrix.setIntensity(0);
+        matrix.fillScreen(LOW);
+        matrix.write();
+    }
     enabled = on;
 }
 
@@ -109,4 +132,39 @@ void Screen::printSlides() {
     Serial.println(enabled);
     Serial.print(F("RAM :"));
     Serial.println(ESP.getFreeHeap());
+}
+
+void Screen::setSongToPlay(const char *song) {
+    if (soundPin != 255) {
+        rtttl::begin(soundPin, song);
+    }
+}
+
+void Screen::setLed(bool status) {
+    if (ledPin != 255) {
+        digitalWrite(ledPin, status);
+    }
+}
+
+void Screen::setBlink() {
+    if (ledPin != 255) {
+        setLed(false);
+        blinkCounter = 0;
+        blinkTicker.attach(0.3, [this]() {
+            this->blinkProcess();
+        });
+    }
+}
+
+void Screen::blinkProcess() {
+    digitalWrite(ledPin, !digitalRead(ledPin));
+
+    ++blinkCounter;
+    if (blinkCounter == 10) {
+        blinkTicker.attach(0.1, [this]() {
+            this->blinkProcess();
+        });
+    } else if (blinkCounter == 30) {
+        blinkTicker.detach();
+    }
 }

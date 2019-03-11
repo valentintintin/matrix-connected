@@ -16,6 +16,8 @@ public:
 
     bool isFinished() override;
 
+    void showRaw() {};
+
 protected:
     String message;
     byte nbLoop = 3;

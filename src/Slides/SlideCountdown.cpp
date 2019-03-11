@@ -39,6 +39,8 @@ String SlideCountdown::getText() {
             timer.restart();
             timeString.remove(0, timeString.length());
             timeString.concat("Fin !");
+            screen->setSongToPlay(dangoSong);
+            screen->setBlink();
         }
     }
 

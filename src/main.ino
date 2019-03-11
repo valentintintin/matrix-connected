@@ -8,14 +8,17 @@
 #include "Slides/SlideTimer.h"
 #include "Slides/SlideCountdown.h"
 
-byte pinCS = D8; // Attach CS to this pin, DIN to MOSI and CLK to SCK
-byte numberOfHorizontalDisplays = 8;
+#define CS_PIN D8
+#define LED_PIN D0
+#define SOUND_PIN D1
+#define NUMBER_DISPLAY_X 8
 
-Screen screen(pinCS, numberOfHorizontalDisplays);
+Screen screen(CS_PIN, NUMBER_DISPLAY_X, SOUND_PIN, LED_PIN);
 SlideClock slideClock(&screen);
 WebServer webServer(&screen);
 
 void setup() {
+    screen.setLed(true);
     Serial.begin(115200);
     Serial.println(F("Starting..."));
 
@@ -30,6 +33,7 @@ void setup() {
 
     screen.setFallBackSlide(&slideClock);
     screen.addSlide(new SlideMessage(&screen, WiFi.localIP().toString()));
+    screen.setLed(false);
 
     webServer.begin();
 }

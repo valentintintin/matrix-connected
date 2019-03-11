@@ -25,6 +25,8 @@ public:
 
     bool show();
 
+    virtual void showRaw() = 0;
+
     virtual bool isFinished() = 0;
 
     virtual bool shouldRecreate() = 0;

@@ -22,6 +22,8 @@ public:
 
     void stop();
 
+    void showRaw() {};
+
 private:
     bool running = false;
     uint64_t initTime, lastTime;

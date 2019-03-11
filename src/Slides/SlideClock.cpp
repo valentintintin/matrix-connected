@@ -1,11 +1,7 @@
 #include "SlideClock.h"
 
-SlideClock::SlideClock(Screen *screen, bool withSeconds) : Slide(screen), withSeconds(withSeconds) {
-    if (withSeconds) {
-        setZone(startX, widthX, _PRINT);
-    } else {
-        setZone(startX, widthX >> 1, _PRINT);
-    }
+SlideClock::SlideClock(Screen *screen) : Slide(screen), heartTimer(Timer(250)) {
+    setZone(startX, widthX, _PRINT);
     create();
 }
 
@@ -13,17 +9,11 @@ SlideClock::~SlideClock() {
 }
 
 String SlideClock::getText() {
-    if (withSeconds) {
-        return NTP.getTimeStr();
-    } else {
-        return getTimeStrSimple(NTP.getTime());
+    if (minute() == 0 && second() == 0) {
+        screen->setSongToPlay(dong);
+        screen->setBlink();
     }
-}
-
-String SlideClock::getTimeStrSimple(time_t moment) {
-    char timeStr[7];
-    sprintf(timeStr, "%02d:%02d", hour(moment), minute(moment));
-    return timeStr;
+    return NTP.getTimeStr();
 }
 
 bool SlideClock::isFinished() {
@@ -32,4 +22,13 @@ bool SlideClock::isFinished() {
 
 bool SlideClock::shouldRecreate() {
     return true;
+}
+
+void SlideClock::showRaw() {
+    if (heartTimer.hasExpired()) {
+        currentHeart++;
+        currentHeart %= 4;
+        heartTimer.restart();
+    }
+    screen->matrix.drawBitmap(screen->matrix.width() - 8 + 1, 0, hearts[currentHeart], 7, 7, HIGH);
 }
