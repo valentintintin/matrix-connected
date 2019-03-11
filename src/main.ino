@@ -23,7 +23,7 @@ void setup() {
     Serial.println(F("Starting..."));
 
     WiFi.mode(WIFI_STA);
-    WiFi.begin("PixelBox", "***REMOVED***");
+    WiFi.begin("PixelBox", "****");
 
     while (WiFi.status() != WL_CONNECTED) { delay(500); }
 
