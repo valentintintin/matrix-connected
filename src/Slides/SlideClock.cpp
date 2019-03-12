@@ -9,7 +9,7 @@ SlideClock::~SlideClock() {
 }
 
 String SlideClock::getText() {
-    if (minute() == 0 && second() == 0) {
+    if (minute() == 0 && second() == 0 && !rtttl::isPlaying()) {
         screen->setSongToPlay(dong);
         screen->setBlink();
     }
