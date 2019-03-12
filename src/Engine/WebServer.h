@@ -5,6 +5,7 @@
 #include <ESPAsyncWebServer.h>
 #include <Slides/SlideTimer.h>
 #include <Slides/SlideCountdown.h>
+#include <DNSServer.h>
 #include "Screen.h"
 
 class WebServer {
@@ -16,11 +17,12 @@ public:
 
     void begin();
 
+    AsyncWebServer server;
+    DNSServer dns;
+
 private:
     SlideTimer slideTimer;
     SlideCountdown slideCountdown;
-
-    AsyncWebServer server;
 };
 
 #endif

@@ -166,5 +166,6 @@ void Screen::blinkProcess() {
         });
     } else if (blinkCounter == 30) {
         blinkTicker.detach();
+        digitalWrite(ledPin, LOW);
     }
 }

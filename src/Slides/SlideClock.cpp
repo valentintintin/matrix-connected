@@ -1,3 +1,4 @@
+#include <NonBlockingRtttl.h>
 #include "SlideClock.h"
 
 SlideClock::SlideClock(Screen *screen) : Slide(screen), heartTimer(Timer(250)) {
@@ -9,7 +10,7 @@ SlideClock::~SlideClock() {
 }
 
 String SlideClock::getText() {
-    if (minute() == 0 && second() == 0 && !rtttl::isPlaying()) {
+    if (hour() != 0 && minute() == 0 && second() == 0 && !rtttl::isPlaying()) {
         screen->setSongToPlay(dong);
         screen->setBlink();
     }

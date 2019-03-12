@@ -1,5 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <NtpClientLib.h>
+#include <ESPAsyncWiFiManager.h>
 
 #include "Engine/Screen.h"
 #include "Engine/WebServer.h"
@@ -12,20 +13,25 @@
 #define LED_PIN D0
 #define SOUND_PIN D1
 #define NUMBER_DISPLAY_X 8
+#define AP_SSID "PixelClock"
 
 Screen screen(CS_PIN, NUMBER_DISPLAY_X, SOUND_PIN, LED_PIN);
 SlideClock slideClock(&screen);
 WebServer webServer(&screen);
 
-void setup() {
+void configModeCallback(AsyncWiFiManager *myWiFiManager) {
     screen.setLed(true);
+    screen.setMainSlide(new SlideMessage(&screen, myWiFiManager->getConfigPortalSSID()));
+    screen.refresh();
+}
+
+void setup() {
     Serial.begin(115200);
-    Serial.println(F("Starting..."));
 
-    WiFi.mode(WIFI_STA);
-    WiFi.begin("PixelBox", "****");
-
-    while (WiFi.status() != WL_CONNECTED) { delay(500); }
+    AsyncWiFiManager wifiManager(&webServer.server, &webServer.dns);
+    wifiManager.setDebugOutput(false);
+    wifiManager.setAPCallback(configModeCallback);
+    wifiManager.autoConnect(AP_SSID);
 
     NTP.begin();
     NTP.setTimeZone(1);
