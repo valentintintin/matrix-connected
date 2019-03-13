@@ -16,7 +16,7 @@
 #define AP_SSID "PixelClock"
 
 Screen screen(CS_PIN, NUMBER_DISPLAY_X, SOUND_PIN, LED_PIN);
-SlideClock slideClock(&screen);
+SlideClock slideClock(&screen, true, true);
 WebServer webServer(&screen);
 
 void configModeCallback(AsyncWiFiManager *myWiFiManager) {

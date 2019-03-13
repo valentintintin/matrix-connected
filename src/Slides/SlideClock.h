@@ -52,7 +52,7 @@ const byte PROGMEM hearts[][8] = {
 class SlideClock : public Slide {
 
 public:
-    explicit SlideClock(Screen *screen);
+    explicit SlideClock(Screen *screen, bool heartEnabled = false, bool dongEnabled = false);
 
     ~SlideClock();
 
@@ -67,6 +67,9 @@ public:
 private:
     Timer heartTimer;
     byte currentHeart = 0;
+    bool hasDong = false;
+    bool heartEnabled = false;
+    bool dongEnabled = false;
 };
 
 #endif
