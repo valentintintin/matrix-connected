@@ -63,7 +63,7 @@ WebServer::WebServer(Screen *screen) : server(AsyncWebServer(80)), slideCountdow
         request->send(200, F("text/plain"), F("OK"));
     });
 
-    server.on("/state", HTTP_PUT, [screen, this](AsyncWebServerRequest *request) {
+    server.on("/state", HTTP_GET, [screen, this](AsyncWebServerRequest *request) {
         if (request->hasArg(F("state"))) {
             screen->setState(request->arg(F("state")).equalsIgnoreCase(F("on")));
             request->send(200, F("text/plain"), F("OK"));
@@ -86,7 +86,7 @@ WebServer::WebServer(Screen *screen) : server(AsyncWebServer(80)), slideCountdow
 
     server.on("/notify", HTTP_GET, [screen, this](AsyncWebServerRequest *request) {
         screen->setBlink();
-        if (request->hasArg(F("song"))) {
+        if (request->hasArg(F("song")) && request->arg(F("song")).equalsIgnoreCase(F("on"))) {
             screen->setSongToPlay(dangoSong);
         }
         request->send(201, F("text/plain"), F("OK"));
