@@ -7,9 +7,8 @@
 
 const char PROGMEM dong[] = "dong:d=10,o=6,b=180,c,e,g";
 
-const byte PROGMEM hearts[][8] = {
+const byte PROGMEM hearts[][7] = {
         {
-                B00000000,
                 B00000000,
                 B00101000,
                 B01010100,
@@ -20,7 +19,6 @@ const byte PROGMEM hearts[][8] = {
         },
         {
                 B00000000,
-                B00000000,
                 B00101000,
                 B01111100,
                 B01111100,
@@ -29,7 +27,6 @@ const byte PROGMEM hearts[][8] = {
                 B00000000
         },
         {
-                B00000000,
                 B01000100,
                 B11101110,
                 B11010110,
@@ -39,7 +36,6 @@ const byte PROGMEM hearts[][8] = {
                 B00010000
         },
         {
-                B00000000,
                 B01000100,
                 B11101110,
                 B11111110,
