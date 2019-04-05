@@ -27,6 +27,8 @@ public:
     bool refresh();
 
     void setState(bool on);
+    
+    void setIntensity(byte intensity);
 
     PPMax72xxPanel matrix;
 
@@ -43,6 +45,7 @@ private:
 
     byte soundPin = 255; // disabled
     byte ledPin = 255; // disabled
+    byte intensity = 0;
 
     Slide *mainSlide = nullptr;
     Slide *fallBackSlide = nullptr;

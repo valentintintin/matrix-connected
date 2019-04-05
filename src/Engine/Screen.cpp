@@ -98,11 +98,18 @@ void Screen::setState(bool on) {
         rtttl::stop();
     }
     if ((!on && enabled) || (!enabled && on)) {
-        matrix.setIntensity(0);
+        matrix.setIntensity(intensity);
         matrix.fillScreen(LOW);
         matrix.write();
     }
     enabled = on;
+}
+
+void Screen::setIntensity(byte intensity) {
+	this->intensity = intensity;
+	if (enabled) {
+		matrix.setIntensity(intensity);
+	}
 }
 
 void Screen::setFallBackSlide(Slide *slide) {

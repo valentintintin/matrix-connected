@@ -104,7 +104,7 @@ WebServer::WebServer(Screen *screen) : server(AsyncWebServer(80)), slideCountdow
 
     server.on("/intensity", HTTP_GET, [screen, this](AsyncWebServerRequest *request) {
         if (request->hasArg(F("val"))) {
-            screen->matrix.setIntensity((byte) request->arg(F("val")).toInt());
+            screen->setIntensity((byte) request->arg(F("val")).toInt());
             request->send(201, F("text/plain"), F("OK"));
         } else {
             request->send(400, F("text/plain"), F("Missing val parameter in query"));
