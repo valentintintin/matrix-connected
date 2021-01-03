@@ -28,6 +28,10 @@ void configModeCallback(AsyncWiFiManager *myWiFiManager) {
 void setup() {
     Serial.begin(115200);
 
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
+    Serial.print(F("Start..."));
+
     AsyncWiFiManager wifiManager(&webServer.server, &webServer.dns);
     wifiManager.setDebugOutput(false);
     wifiManager.setAPCallback(configModeCallback);
@@ -42,6 +46,9 @@ void setup() {
     screen.setLed(false);
 
     webServer.begin();
+
+    Serial.println(F(" OK !"));
+    digitalWrite(LED_BUILTIN, LOW);
 }
 
 void loop() {

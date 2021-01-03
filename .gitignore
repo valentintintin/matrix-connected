@@ -4,4 +4,4 @@
 main
 CMakeList*
 .idea
-cmake-build-debug
+cmake-build-nodemcu
