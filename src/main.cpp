@@ -1,56 +1,80 @@
 #include <ESP8266WiFi.h>
 #include <NtpClientLib.h>
 #include <ESPAsyncWiFiManager.h>
+#include <MD_Parola.h>
+#include <MD_MAX72xx.h>
+#include <SPI.h>
+#include <Engine/WebServer.h>
+#include <Applets/AppletMessage.h>
 
-#include "Engine/Screen.h"
-#include "Engine/WebServer.h"
-#include "Slides/SlideClock.h"
-#include "Slides/SlideMessage.h"
-#include "Slides/SlideTimer.h"
-#include "Slides/SlideCountdown.h"
+#include "Engine/Orchestror.h"
+#include "Engine/Utils.h"
+#include "Applets/AppletClock.h"
+#include "FontData.h"
 
 #define CS_PIN D8
 #define LED_PIN D0
 #define SOUND_PIN D1
-#define NUMBER_DISPLAY_X 8
 #define AP_SSID "PixelClock"
 
-Screen screen(CS_PIN, NUMBER_DISPLAY_X, SOUND_PIN, LED_PIN);
-SlideClock slideClock(&screen, true, true);
-WebServer webServer(&screen);
+MD_Parola matrix = MD_Parola(MD_MAX72XX::FC16_HW, CS_PIN, 16);
+Orchestror orchestror(&matrix);
 
-void configModeCallback(AsyncWiFiManager *myWiFiManager) {
-    screen.setLed(true);
-    screen.setMainSlide(new SlideMessage(&screen, myWiFiManager->getConfigPortalSSID()));
-    screen.refresh();
-}
+WebServer webServer(&matrix, &orchestror);
+
+//void configModeCallback(AsyncWiFiManager *myWiFiManager) {
+//    screen.setLed(true);
+//    screen.setMainApplet(new AppletMessage(&screen, myWiFiManager->getConfigPortalSSID()));
+//    screen.refresh();
+//}
 
 void setup() {
+#ifdef DEBUG
     Serial.begin(115200);
+#endif
+
+    DPRINTLN(F("[PROGRAM]Start"));
 
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);
-    Serial.print(F("Start..."));
+    pinMode(LED_PIN, OUTPUT);
+    DPRINTLN(F("[LED]High"));
+    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_PIN, HIGH);
 
+    DPRINTLN(F("[MATRIX]Start"));
+    matrix.begin(2);
+    matrix.setZone(0, 0, 9);
+    matrix.setZone(1, 10, 15);
+    matrix.setIntensity(0);
+    matrix.setPause(0);
+    matrix.setSpeed(20);
+    matrix.setFont(font);
+
+    DPRINTLN(F("[WIFI MANAGER]Start"));
     AsyncWiFiManager wifiManager(&webServer.server, &webServer.dns);
     wifiManager.setDebugOutput(false);
-    wifiManager.setAPCallback(configModeCallback);
+    //wifiManager.setAPCallback(configModeCallback);
     wifiManager.autoConnect(AP_SSID);
 
+    DPRINTLN(F("[NTP]Start"));
     NTP.begin();
     NTP.setTimeZone(1);
     NTP.setDayLight(true);
 
-    screen.setFallBackSlide(&slideClock);
-    screen.addSlide(new SlideMessage(&screen, WiFi.localIP().toString()));
-    screen.setLed(false);
-
     webServer.begin();
 
-    Serial.println(F(" OK !"));
-    digitalWrite(LED_BUILTIN, LOW);
+    DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
+    orchestror.addApplet(new AppletMessage(0, String(PSTR(AP_SSID))));
+    orchestror.addApplet(new AppletMessage(0, WiFi.localIP().toString()));
+    orchestror.addApplet(new AppletClock(1, true, true));
+
+    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_PIN, LOW);
+    DPRINTLN(F("[LED]Low"));
+
+    DPRINTLN(F("[PROGRAM]OK"));
 }
 
 void loop() {
-    screen.refresh();
+    orchestror.update();
 }

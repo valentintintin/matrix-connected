@@ -3,16 +3,15 @@
 
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <Slides/SlideTimer.h>
-#include <Slides/SlideCountdown.h>
 #include <DNSServer.h>
-#include "Screen.h"
+#include <MD_Parola.h>
+
+#include "Orchestror.h"
 
 class WebServer {
 
 public:
-    WebServer(Screen *screen);
-
+    explicit WebServer(MD_Parola* matrix, Orchestror* orchestror);
     ~WebServer();
 
     void begin();
@@ -21,8 +20,6 @@ public:
     DNSServer dns;
 
 private:
-    SlideTimer slideTimer;
-    SlideCountdown slideCountdown;
 };
 
 #endif

@@ -1,14 +1,14 @@
-#ifndef SLIDE_TIMER_H
-#define SLIDE_TIMER_H
+#ifndef APPLET_TIMER_H
+#define APPLET_TIMER_H
 
-#include "Engine/Slide.h"
+#include "../../old/Applet.h"
 
-class SlideTimer : public Slide {
+class AppletTimer : public Applet {
 
 public:
-    explicit SlideTimer(Screen *screen);
+    explicit AppletTimer(Screen *screen);
 
-    ~SlideTimer();
+    ~AppletTimer();
 
     String getText() override;
 

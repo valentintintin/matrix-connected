@@ -1,30 +1,30 @@
 #include <Engine/Utils.h>
-#include "SlideTimer.h"
+#include "AppletTimer.h"
 
-SlideTimer::SlideTimer(Screen *screen) : Slide(screen), initTime(millis()) {
+AppletTimer::AppletTimer(Screen *screen) : Applet(screen), initTime(millis()) {
     timeString.reserve(15);
     setZone(startX, widthX, _PRINT);
     create();
     restart();
 }
 
-SlideTimer::~SlideTimer() {
+AppletTimer::~AppletTimer() {
 }
 
-void SlideTimer::start() {
+void AppletTimer::start() {
     running = true;
 }
 
-void SlideTimer::restart() {
+void AppletTimer::restart() {
     initTime = millis();
     start();
 }
 
-void SlideTimer::stop() {
+void AppletTimer::stop() {
     running = false;
 }
 
-String SlideTimer::getText() {
+String AppletTimer::getText() {
     if (running) {
         lastTime = millis();
         millisToString(lastTime - initTime, &timeString);
@@ -33,10 +33,10 @@ String SlideTimer::getText() {
     return timeString;
 }
 
-bool SlideTimer::isFinished() {
+bool AppletTimer::isFinished() {
     return running ? true : baseIsFinished();
 }
 
-bool SlideTimer::shouldRecreate() {
+bool AppletTimer::shouldRecreate() {
     return true;
 }

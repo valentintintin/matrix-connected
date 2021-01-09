@@ -1,22 +1,22 @@
 #include <Engine/Utils.h>
-#include "SlideCountdown.h"
+#include "AppletCountdown.h"
 
-SlideCountdown::SlideCountdown(Screen *screen) : Slide(screen), initTime(millis()) {
+AppletCountdown::AppletCountdown(Screen *screen) : Applet(screen), initTime(millis()) {
     timeString.reserve(15);
     setZone(startX, widthX, _PRINT);
     create();
     restart();
 }
 
-SlideCountdown::~SlideCountdown() {
+AppletCountdown::~AppletCountdown() {
 }
 
-void SlideCountdown::start() {
+void AppletCountdown::start() {
     running = true;
     timer.restart();
 }
 
-void SlideCountdown::restart(uint64_t millisToCount) {
+void AppletCountdown::restart(uint64_t millisToCount) {
     if (millisToCount > 0) {
         this->millisToCount = millisToCount * 1000;
     }
@@ -24,11 +24,11 @@ void SlideCountdown::restart(uint64_t millisToCount) {
     start();
 }
 
-void SlideCountdown::stop() {
+void AppletCountdown::stop() {
     running = false;
 }
 
-String SlideCountdown::getText() {
+String AppletCountdown::getText() {
     if (running) {
         lastTime = millis();
 
@@ -47,10 +47,10 @@ String SlideCountdown::getText() {
     return timeString;
 }
 
-bool SlideCountdown::isFinished() {
+bool AppletCountdown::isFinished() {
     return running ? true : baseIsFinished();
 }
 
-bool SlideCountdown::shouldRecreate() {
+bool AppletCountdown::shouldRecreate() {
     return running;
 }

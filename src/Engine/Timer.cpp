@@ -1,8 +1,12 @@
 #include "Timer.h"
 #include <Arduino.h>
 
-Timer::Timer(unsigned long interval) : interval(interval) {
-    restart();
+Timer::Timer(unsigned long interval, bool hasExpired) : interval(interval) {
+    if (hasExpired) {
+        setExpired();
+    } else {
+        restart();
+    }
 }
 
 

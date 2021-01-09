@@ -2,27 +2,27 @@
 #define SCREEN_H
 
 #include <Arduino.h>
-#include <Adafruit_GFX.h>
-#include <PPMax72xxPanel.h>
-#include <Queue.h>
-#include <Ticker.h>
+//#include <Adafruit_GFX.h>
+//#include <PPMax72xxPanel.h>
+//#include <Queue.h>
+//#include <Ticker.h>
 
-#define MAX_SLIDES_IN_QUEUE 10
+#define MAX_APPLETS_IN_QUEUE 10
 
-class Slide;
+class Applet;
 
 class Screen {
 
 public:
     explicit Screen(byte csPin, byte hDisplays, byte soundPin = 255, byte ledPin = 255);
 
-    void addSlide(Slide *slide);
+    void addApplet(Applet *slide);
 
-    void setMainSlide(Slide *slide);
+    void setMainApplet(Applet *slide);
 
-    void setFallBackSlide(Slide *slide);
+    void setFallBackApplet(Applet *slide);
 
-    const Slide *getMainSlide();
+    const Applet *getMainApplet();
 
     bool refresh();
 
@@ -30,7 +30,7 @@ public:
     
     void setIntensity(byte intensity);
 
-    PPMax72xxPanel matrix;
+//    PPMax72xxPanel matrix;
 
     void setSongToPlay(const char *song);
 
@@ -39,7 +39,7 @@ public:
     void setBlink();
 
 private:
-    void printSlides();
+    void printApplets();
 
     void blinkProcess();
 
@@ -47,13 +47,13 @@ private:
     byte ledPin = 255; // disabled
     byte intensity = 0;
 
-    Slide *mainSlide = nullptr;
-    Slide *fallBackSlide = nullptr;
-    Queue<Slide *> slides = Queue<Slide *>(MAX_SLIDES_IN_QUEUE);
+    Applet *mainApplet = nullptr;
+    Applet *fallBackApplet = nullptr;
+//    Queue<Applet *> slides = Queue<Applet *>(MAX_APPLETS_IN_QUEUE);
 
     bool enabled = false;
 
-    Ticker blinkTicker;
+//    Ticker blinkTicker;
     byte blinkCounter;
 };
 

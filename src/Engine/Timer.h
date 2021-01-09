@@ -4,7 +4,7 @@
 class Timer {
 
 public:
-    Timer(unsigned long interval);
+    Timer(unsigned long interval, bool hasExpired = false);
 
     ~Timer();
 
