@@ -1,9 +1,11 @@
 #ifndef MATRIX_CONNECTED_ORCHESTROR_H
 #define MATRIX_CONNECTED_ORCHESTROR_H
 
-#define NB_MAX_APPLETS 16
+#define NB_MAX_APPLETS 30
 
 #include <Arduino.h>
+
+class Applet;
 
 #include "Applet.h"
 #include "Utils.h"
@@ -16,7 +18,7 @@ public:
     void update();
 
     void addApplet(Applet* applet);
-    void pauseApplet(Applet* applet);
+    void pauseApplet(Applet* applet, bool displayNext = true);
     void resumeApplet(Applet* applet);
     void destroyApplet(byte iApplet);
 

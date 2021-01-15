@@ -76,7 +76,6 @@ void Orchestror::addApplet(Applet* applet) {
         }
 
         if (appletFor != nullptr && currentAppletDisplayedInZone == nullptr) {
-
             if (
                 appletFor->getIdZone() == applet->getIdZone() // Same zone
                 && appletFor->isDisplayed() // Currently displayed
@@ -96,7 +95,7 @@ void Orchestror::addApplet(Applet* applet) {
         if (currentAppletDisplayedInZone->getPriority() < applet->getPriority()) {
             resumeApplet(applet);
         } else {
-            pauseApplet(applet);
+            pauseApplet(applet, false);
         }
     } else {
         resumeApplet(applet);
@@ -110,12 +109,14 @@ void Orchestror::resumeApplet(Applet* applet) {
     applet->draw(matrix, true);
 }
 
-void Orchestror::pauseApplet(Applet* applet) {
+void Orchestror::pauseApplet(Applet* applet, bool displayNext) {
     DPRINTLN(F("[ORCHESTROR]Pause applet")); DPRINT(F("\t"));
 
     applet->onPause();
 
-    displayNextApplet(applet->getIdZone(), applet);
+    if (displayNext) {
+        displayNextApplet(applet->getIdZone(), applet);
+    }
 }
 
 void Orchestror::destroyApplet(byte iApplet) {
@@ -151,7 +152,7 @@ void Orchestror::displayNextApplet(byte idZone, Applet* toExclude) {
         if (applets[i] != nullptr) {
             Applet *appletFor = applets[i]; // Applet in this place
 
-            if (appletFor->getIdZone() == idZone && (toExclude == nullptr || toExclude != appletFor)) { // Same zone and not current
+            if (appletFor->getIdZone() == idZone && (toExclude == nullptr || toExclude->getId() != appletFor->getId())) { // Same zone and not current
                 DPRINTLN(F("\t[ORCHESTROR]Found applet to display"));
 
                 resumeApplet(appletFor);

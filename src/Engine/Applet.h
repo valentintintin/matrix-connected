@@ -3,12 +3,17 @@
 
 #include <MD_Parola.h>
 
+class Orchestror;
+
 #include "Engine/Utils.h"
+#include "Orchestror.h"
 
 class Applet {
 
 public:
-    Applet(byte idZone, const char* name, byte priority = 0);
+    static long APPLET_ID;
+
+    Applet(Orchestror* orchestror, byte idZone, const char* name, byte priority = 0);
     ~Applet();
 
     void onInit();
@@ -32,6 +37,10 @@ public:
         return name;
     }
 
+    inline const long getId() const {
+        return id;
+    }
+
     virtual void refresh();
     virtual void printSerial();
 
@@ -39,10 +48,14 @@ public:
     virtual bool shouldBeDestroyed(bool isAnimationFinished) = 0;
     virtual void draw(MD_Parola* matrix, bool isAnimationFinished) = 0;
 
+protected:
+    Orchestror* orchestror;
+
 private:
     char name[16];
     const byte idZone;
     const byte priority;
+    const long id;
     bool displayed = false;
 };
 

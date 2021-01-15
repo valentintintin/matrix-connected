@@ -3,13 +3,12 @@
 
 #include "../Engine/Applet.h"
 
-#define NAME "AppletMessage"
 #define MAX_LENGTH_MESSAGE 255
 
 class AppletMessage : public Applet {
 
 public:
-    explicit AppletMessage(byte idZone, String message);
+    explicit AppletMessage(Orchestror* orchestror, byte idZone, String message);
     ~AppletMessage();
 
     bool shouldBePaused(bool isAnimationFinished) override;

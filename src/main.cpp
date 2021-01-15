@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <Engine/WebServer.h>
 #include <Applets/AppletMessage.h>
+#include <Applets/AppletHeart.h>
 
 #include "Engine/Orchestror.h"
 #include "Engine/Utils.h"
@@ -29,9 +30,7 @@ WebServer webServer(&matrix, &orchestror);
 //}
 
 void setup() {
-#ifdef DEBUG
     Serial.begin(115200);
-#endif
 
     DPRINTLN(F("[PROGRAM]Start"));
 
@@ -42,9 +41,10 @@ void setup() {
     digitalWrite(LED_PIN, HIGH);
 
     DPRINTLN(F("[MATRIX]Start"));
-    matrix.begin(2);
+    matrix.begin(3);
     matrix.setZone(0, 0, 9);
-    matrix.setZone(1, 10, 15);
+    matrix.setZone(1, 10, 14);
+    matrix.setZone(2, 15, 15);
     matrix.setIntensity(0);
     matrix.setPause(0);
     matrix.setSpeed(20);
@@ -64,9 +64,10 @@ void setup() {
     webServer.begin();
 
     DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
-    orchestror.addApplet(new AppletMessage(0, String(PSTR(AP_SSID))));
-    orchestror.addApplet(new AppletMessage(0, WiFi.localIP().toString()));
-    orchestror.addApplet(new AppletClock(1, true, true));
+    orchestror.addApplet(new AppletHeart(&orchestror, 2));
+    orchestror.addApplet(new AppletMessage(&orchestror, 0, String(PSTR(AP_SSID))));
+    orchestror.addApplet(new AppletMessage(&orchestror, 0, WiFi.localIP().toString()));
+    orchestror.addApplet(new AppletClock(&orchestror, 1, true));
 
     digitalWrite(LED_BUILTIN, HIGH);
     digitalWrite(LED_PIN, LOW);

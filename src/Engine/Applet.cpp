@@ -1,6 +1,8 @@
 #include "Applet.h"
 
-Applet::Applet(byte idZone, const char* name, byte priority) : idZone(idZone), priority(priority) {
+long Applet::APPLET_ID = 1;
+
+Applet::Applet(Orchestror* orchestror, byte idZone, const char* name, byte priority) : orchestror(orchestror), idZone(idZone), priority(priority), id(APPLET_ID++) {
     strcpy_P(this->name, name);
     DPRINT(F("[APPLET NEW] ")); printSerial();
 }
@@ -34,5 +36,5 @@ void Applet::refresh() {
 }
 
 void Applet::printSerial() {
-    DPRINT(F("[APPLET]")); DPRINT(getName()); DPRINT(F("(")); DPRINT(getIdZone()); DPRINT(F(")")); DPRINT(F(", Displayed: ")); DPRINTLN(isDisplayed());
+    DPRINT(F("[APPLET]")); DPRINT(getName()); DPRINT(F("(")); DPRINT(id); DPRINT(F(")")); DPRINT(F(", Zone: ")); DPRINT(getIdZone()); DPRINT(F(", Displayed: ")); DPRINTLN(isDisplayed());
 }

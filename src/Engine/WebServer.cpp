@@ -4,10 +4,14 @@
 
 WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWebServer(80)) {
     server.on("/message/add", HTTP_GET, [orchestror](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/message/add\t"));
         if (request->hasArg("msg") && request->arg("msg").length() > 0) {
-            orchestror->addApplet(new AppletMessage(0, request->arg("msg")));
+            String msg = request->arg("msg");
+            DPRINT(F("Msg: ")); DPRINTLN(msg);
+            orchestror->addApplet(new AppletMessage(orchestror, 0, msg));
             request->send(201, F("text/plain"), F("OK"));
         } else {
+            DPRINTLN("Missing msd parameter");
             request->send(400, F("text/plain"), F("Missing msg parameter in query"));
         }
     });
@@ -30,7 +34,7 @@ WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWe
 //        request->send(200, F("text/plain"), F("OK"));
 //    });
 //
-//    server.on("/countdown/start", HTTP_GET, [screen, this](AsyncWebServerRequest *request) {
+//    server.on("/countdown/start", HTTP_GET, [orchestror](AsyncWebServerRequest *request) {
 //        if (request->hasArg(F("duration"))) {
 //            slideCountdown.restart((uint64_t) request->arg(F("duration")).toInt());
 //            screen->setMainApplet(&slideCountdown);
@@ -63,23 +67,30 @@ WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWe
 //    });
 //
     server.on("/state", HTTP_GET, [orchestror](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/state\t"));
         if (request->hasArg(F("state"))) {
-            orchestror->setState(request->arg(F("state")).equalsIgnoreCase(F("on")));
+            bool state = request->arg(F("state")).equalsIgnoreCase(F("on"));
+            DPRINT(F("State: ")); DPRINTLN(state);
+            orchestror->setState(state);
             request->send(200, F("text/plain"), F("OK"));
         } else {
+            DPRINTLN("Missing duration parameter");
             request->send(400, F("text/plain"), F("Missing duration parameter in query"));
         }
     });
 
     server.on("/ram", HTTP_GET, [](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/ram"));
         request->send(200, F("text/plain"), String(ESP.getFreeHeap()));
     });
 
     server.on("/ram2", HTTP_GET, [](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/ram2"));
         request->send(200, F("text/plain"), String(ESP.getHeapFragmentation()));
     });
 
     server.on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/uptime"));
         request->send(200, F("text/plain"), NTP.getUptimeString());
     });
 //
@@ -102,16 +113,21 @@ WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWe
 //    });
 //
     server.on("/intensity", HTTP_GET, [matrix](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/intensity\t"));
         if (request->hasArg(F("val"))) {
-            matrix->setIntensity(request->arg(F("val")).toInt());
+            byte val = (byte) request->arg(F("val")).toInt();
+            DPRINT(F("Val: ")); DPRINTLN(val);
+            matrix->setIntensity(val);
             request->send(201, F("text/plain"), F("OK"));
         } else {
+            DPRINTLN("Missing val parameter");
             request->send(400, F("text/plain"), F("Missing val parameter in query"));
         }
         request->send(201, F("text/plain"), F("OK"));
     });
 
     server.onNotFound([](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]Not found\t"));
         request->send(404, F("text/plain"), F("Not found"));
     });
 }

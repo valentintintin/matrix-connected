@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <WString.h>
+#include <Arduino.h>
 
 //#define DEBUG
 
@@ -14,7 +14,11 @@
 #endif
 
 void millisToString(uint64_t milliseconds, String *timeString);
+void millisToString(uint64_t milliseconds, char *timeString);
 
-void utf8ToCp437(String &s);
+uint8_t utf8Ascii(uint8_t ascii);
+void utf8Ascii(char* s);
+String utf8ascii(String &s);
+void utf8AsciiS(String &s);
 
 #endif
