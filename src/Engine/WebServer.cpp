@@ -72,7 +72,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     server.on("/state", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/matrixActivated\t"));
         if (request->hasArg(F("state"))) {
-            bool state = request->arg(F("state<")).equalsIgnoreCase(F("on"));
+            bool state = request->arg(F("state")).equalsIgnoreCase(F("on"));
             DPRINT(F("State: ")); DPRINTLN(state);
             system->setMatrixActivated(state);
             request->send(200, F("text/plain"), F("OK"));
