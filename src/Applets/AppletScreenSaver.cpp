@@ -8,8 +8,8 @@ AppletScreenSaver::~AppletScreenSaver() = default;
 void AppletScreenSaver::onInit(MD_Parola *matrix) {
     Applet::onInit(matrix);
 
-    currentRow = 0;
-    currentColumn = getStartColumn();
+    currentRow = 4;
+    currentColumn = (getEndColumn() - getStartColumn()) / 2 + getStartColumn();
 
     resetToGo();
 }
@@ -48,5 +48,8 @@ void AppletScreenSaver::draw(MD_Parola *matrix, bool isAnimationFinished) {
 
 void AppletScreenSaver::resetToGo() {
     toGoRow = random(0, 8);
-    toGoColumn = random(getStartColumn(), getEndColumn());
+    toGoColumn = random(
+        toGoColumn - MAX_COLUMN_AWAY > getStartColumn() ? toGoColumn - MAX_COLUMN_AWAY : getStartColumn(),
+        toGoColumn + MAX_COLUMN_AWAY < getEndColumn() ? toGoColumn + MAX_COLUMN_AWAY : getEndColumn()
+    );
 }

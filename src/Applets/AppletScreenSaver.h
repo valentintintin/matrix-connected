@@ -4,6 +4,8 @@
 #include "../Engine/Applet.h"
 #include "../Engine/Timer.h"
 
+#define MAX_COLUMN_AWAY 24
+
 class AppletScreenSaver : public Applet {
 
 public:
