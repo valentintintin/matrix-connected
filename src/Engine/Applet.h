@@ -13,20 +13,22 @@ class Applet {
 public:
     static long APPLET_ID;
 
-    Applet(Orchestror* orchestror, byte idZone, const char* name, byte priority = 0);
+    Applet(const Orchestror *orchestror, const char* name, byte priority = 0);
     ~Applet();
 
-    void onInit();
-    void onPause();
-    void OnResume();
-    void onDestroy();
+    virtual void onInit(MD_Parola *matrix);
+    virtual void onPause();
+    virtual void onResume(MD_Parola *matrix);
+    virtual void onDestroy();
 
     inline bool isDisplayed() const {
         return displayed;
     }
 
-    inline byte getIdZone() const {
-        return idZone;
+    const byte getIdZone() const;
+
+    inline const long getId() const {
+        return id;
     }
 
     inline byte getPriority() const {
@@ -37,8 +39,12 @@ public:
         return name;
     }
 
-    inline const long getId() const {
-        return id;
+    inline const uint16_t getStartColumn() const {
+        return startColumn;
+    }
+
+    inline const uint16_t getEndColumn() const {
+        return endColumn;
     }
 
     virtual void refresh();
@@ -46,17 +52,17 @@ public:
 
     virtual bool shouldBePaused(bool isAnimationFinished) = 0;
     virtual bool shouldBeDestroyed(bool isAnimationFinished) = 0;
-    virtual void draw(MD_Parola* matrix, bool isAnimationFinished) = 0;
+    virtual void draw(MD_Parola *matrix, bool isAnimationFinished) = 0;
 
 protected:
-    Orchestror* orchestror;
+    const Orchestror* orchestror;
 
 private:
     char name[16];
-    const byte idZone;
     const byte priority;
     const long id;
     bool displayed = false;
+    uint16_t startColumn, endColumn;
 };
 
 

@@ -1,14 +1,17 @@
 #include <NtpClientLib.h>
-#include <Applets/AppletMessage.h>
+
+#include "Applets/AppletMessage.h"
 #include "WebServer.h"
 
-WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWebServer(80)) {
-    server.on("/message/add", HTTP_GET, [orchestror](AsyncWebServerRequest *request) {
+WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
+    Orchestror* orchestror = system->getOrchestorForZone(ZONE_RIGHT);
+
+    server.on("/message/add", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/message/add\t"));
         if (request->hasArg("msg") && request->arg("msg").length() > 0) {
             String msg = request->arg("msg");
             DPRINT(F("Msg: ")); DPRINTLN(msg);
-            orchestror->addApplet(new AppletMessage(orchestror, 0, msg));
+            system->getAppletMessage()->addMessage(msg);
             request->send(201, F("text/plain"), F("OK"));
         } else {
             DPRINTLN("Missing msd parameter");
@@ -49,7 +52,7 @@ WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWe
 //                screen->setMainApplet(&slideCountdown);
 //                request->send(201, F("text/plain"), F("OK"));
 //            } else {
-//                request->send(400, F("text/plain"), F("Missing state parameter in query (on|off)"));
+//                request->send(400, F("text/plain"), F("Missing matrixActivated parameter in query (on|off)"));
 //            }
 //        }
 //    });
@@ -66,12 +69,12 @@ WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWe
 //        request->send(200, F("text/plain"), F("OK"));
 //    });
 //
-    server.on("/state", HTTP_GET, [orchestror](AsyncWebServerRequest *request) {
-        DPRINTLN(F("[WEB SERVER]/state\t"));
+    server.on("/state", HTTP_GET, [system](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/matrixActivated\t"));
         if (request->hasArg(F("state"))) {
-            bool state = request->arg(F("state")).equalsIgnoreCase(F("on"));
+            bool state = request->arg(F("state<")).equalsIgnoreCase(F("on"));
             DPRINT(F("State: ")); DPRINTLN(state);
-            orchestror->setState(state);
+            system->setMatrixActivated(state);
             request->send(200, F("text/plain"), F("OK"));
         } else {
             DPRINTLN("Missing duration parameter");
@@ -112,12 +115,12 @@ WebServer::WebServer(MD_Parola* matrix, Orchestror* orchestror) : server(AsyncWe
 //        request->send(201, F("text/plain"), F("OK"));
 //    });
 //
-    server.on("/intensity", HTTP_GET, [matrix](AsyncWebServerRequest *request) {
+    server.on("/intensity", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/intensity\t"));
         if (request->hasArg(F("val"))) {
             byte val = (byte) request->arg(F("val")).toInt();
             DPRINT(F("Val: ")); DPRINTLN(val);
-            matrix->setIntensity(val);
+            system->getMatrix()->setIntensity(val);
             request->send(201, F("text/plain"), F("OK"));
         } else {
             DPRINTLN("Missing val parameter");

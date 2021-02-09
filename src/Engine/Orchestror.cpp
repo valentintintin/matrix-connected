@@ -1,47 +1,52 @@
 #include "Orchestror.h"
 
-Orchestror::Orchestror(MD_Parola* matrix) : matrix(matrix) {
+Orchestror::Orchestror(System* system, byte idZone) : idZone(idZone), system(system) {
     for (byte i = 0; i < NB_MAX_APPLETS; i++) {
         applets[i] = nullptr;
     }
 }
 
 void Orchestror::update() {
-    DPRINT(F("[ORCHESTROR]\r\n\t[UPDATE]State: ")); DPRINT(state); DPRINT(F(", NbApplets: ")); DPRINTLN(nbApplets);
+    DPRINT(F("[ORCHESTROR ")); DPRINT(idZone); DPRINT(F("]\r\n\t[UPDATE]")); DPRINT(F("NbApplets: ")); DPRINTLN(nbApplets);
 
-    if (state) {
-        matrix->synchZoneStart();
-        matrix->displayAnimate();
-    } else {
-        // fake delay for CPU stress
-        delay(matrix->getSpeed());
-    }
+    MD_Parola* matrix = system->getMatrix();
+    bool zoneFinished = matrix->getZoneStatus(idZone);
 
+    Applet* appletMaxPriority = nullptr;
     for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-        Applet* applet = applets[i];
+        Applet *applet = applets[i];
 
         if (applet != nullptr) {
-            bool zoneFinished = matrix->getZoneStatus(applet->getIdZone());
-
             DPRINT(F("\tBlock ")); DPRINT(i); DPRINT(F(", zoneFinished: ")); DPRINT(zoneFinished); DPRINT(F("\r\n\t\t")); applet->printSerial();
 
             applet->refresh();
 
-            if (applet->isDisplayed()) {
-                if (applet->shouldBeDestroyed(zoneFinished)) {
-                    destroyApplet(i);
+            if (applet->shouldBeDestroyed(zoneFinished)) {
+                destroyApplet(i);
 
-                    continue;
-                } else if (applet->shouldBePaused(zoneFinished)) {
-                    pauseApplet(applet);
+                continue;
+            }
 
-                    continue;
-                }
-
-                DPRINTLN(F("\t[Draw]"));
-                applet->draw(matrix, zoneFinished);
+            if (
+                    !applet->shouldBePaused(zoneFinished)
+                    && (currentApplet == nullptr || appletMaxPriority == nullptr || applet->getPriority() > appletMaxPriority->getPriority())
+            ) {
+                appletMaxPriority = applet;
             }
         }
+    }
+
+    if (currentApplet == nullptr && appletMaxPriority != nullptr) {
+        resumeApplet(appletMaxPriority);
+    }
+
+    if (currentApplet != nullptr) {
+        if (appletMaxPriority != nullptr && currentApplet->getId() != appletMaxPriority->getId()) {
+            resumeApplet(appletMaxPriority);
+        }
+
+        DPRINTLN(F("\t[Draw]"));
+        currentApplet->draw(matrix, zoneFinished);
     }
 }
 
@@ -57,56 +62,32 @@ void Orchestror::addApplet(Applet* applet) {
     DPRINT(F("\t"));
 
     nbApplets++;
-    applet->onInit();
+    applet->onInit(system->getMatrix());
 
     // Add new applet and find if there is already one which is displayed
-    Applet* currentAppletDisplayedInZone = nullptr;
-    bool appledAdded = false;
-
     for (byte i = 0; i < NB_MAX_APPLETS; i++) {
         Applet *appletFor = applets[i]; // Applet in this place
 
-        if (!appledAdded && appletFor == nullptr) { // Free block, new applet add in this place
+        if (appletFor == nullptr) { // Free block, new applet add in this place
             DPRINT(F("\tFound block ")); DPRINTLN(i);
 
             applets[i] = applet;
-            appledAdded = true;
 
-            continue; // Nothing more to do
+            break; // Nothing more to do
         }
-
-        if (appletFor != nullptr && currentAppletDisplayedInZone == nullptr) {
-            if (
-                appletFor->getIdZone() == applet->getIdZone() // Same zone
-                && appletFor->isDisplayed() // Currently displayed
-            ) {
-                DPRINT(F("\tFound already displayed applet in zone in block ")); DPRINTLN(i);
-
-                currentAppletDisplayedInZone = appletFor;
-
-                if (appledAdded) {
-                    break; // We have everything so we break the loop
-                }
-            }
-        }
-    }
-
-    if (currentAppletDisplayedInZone != nullptr) {
-        if (currentAppletDisplayedInZone->getPriority() < applet->getPriority()) {
-            resumeApplet(applet);
-        } else {
-            pauseApplet(applet, false);
-        }
-    } else {
-        resumeApplet(applet);
     }
 }
 
 void Orchestror::resumeApplet(Applet* applet) {
     DPRINTLN(F("[ORCHESTROR]Resume applet")); DPRINT(F("\t"));
 
-    applet->OnResume();
-    applet->draw(matrix, true);
+    if (currentApplet != nullptr) {
+        pauseApplet(currentApplet);
+    }
+
+    applet->onResume(system->getMatrix());
+
+    currentApplet = applet;
 }
 
 void Orchestror::pauseApplet(Applet* applet, bool displayNext) {
@@ -114,17 +95,13 @@ void Orchestror::pauseApplet(Applet* applet, bool displayNext) {
 
     applet->onPause();
 
-    if (displayNext) {
-        displayNextApplet(applet->getIdZone(), applet);
-    }
+    currentApplet = nullptr;
 }
 
 void Orchestror::destroyApplet(byte iApplet) {
     DPRINTLN(F("[ORCHESTROR]Destroy applet")); DPRINT(F("\t"));
 
     Applet* applet = applets[iApplet];
-
-    displayNextApplet(applet->getIdZone(), applet);
 
     applet->onDestroy();
     nbApplets--;
@@ -135,29 +112,4 @@ void Orchestror::destroyApplet(byte iApplet) {
 #pragma clang diagnostic pop
 
     applets[iApplet] = nullptr;
-}
-
-void Orchestror::setState(bool newState) {
-    DPRINTLN(F("[ORCHESTROR]Change state to ")); DPRINTLN(state);
-
-    state = newState;
-
-    matrix->displayShutdown(!state);
-}
-
-void Orchestror::displayNextApplet(byte idZone, Applet* toExclude) {
-    DPRINT(F("[ORCHESTROR]Display next Applet zone ")); DPRINTLN(idZone);
-
-    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-        if (applets[i] != nullptr) {
-            Applet *appletFor = applets[i]; // Applet in this place
-
-            if (appletFor->getIdZone() == idZone && (toExclude == nullptr || toExclude->getId() != appletFor->getId())) { // Same zone and not current
-                DPRINTLN(F("\t[ORCHESTROR]Found applet to display"));
-
-                resumeApplet(appletFor);
-                break; // We have everything so we break the loop
-            }
-        }
-    }
 }

@@ -11,7 +11,7 @@
 class WebServer {
 
 public:
-    explicit WebServer(MD_Parola* matrix, Orchestror* orchestror);
+    explicit WebServer(System* system);
     ~WebServer();
 
     void begin();

@@ -1,20 +1,21 @@
 #ifndef MATRIX_CONNECTED_ORCHESTROR_H
 #define MATRIX_CONNECTED_ORCHESTROR_H
 
-#define NB_MAX_APPLETS 30
+#define NB_MAX_APPLETS 10
 
 #include <Arduino.h>
 
 class Applet;
+class System;
 
 #include "Applet.h"
+#include "System.h"
 #include "Utils.h"
 
 class Orchestror {
 public:
-    Orchestror(MD_Parola* matrix);
+    Orchestror(System* system, byte idZone);
 
-    void setState(bool newState);
     void update();
 
     void addApplet(Applet* applet);
@@ -22,13 +23,20 @@ public:
     void resumeApplet(Applet* applet);
     void destroyApplet(byte iApplet);
 
-private:
-    void displayNextApplet(byte idZone, Applet* toExclude = nullptr);
+    inline const byte getIdZone() const {
+        return idZone;
+    }
 
-    bool state = true;
+    inline System* getSystem() {
+        return system;
+    }
+
+private:
+    const byte idZone;
     byte nbApplets = 0;
+    Applet* currentApplet = nullptr;
     Applet* applets[NB_MAX_APPLETS];
-    MD_Parola* matrix;
+    System* system;
 };
 
 

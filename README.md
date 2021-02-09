@@ -21,7 +21,7 @@ Every parameters are in query string.
 - /message/add?msg=XX
 - /timer/(start|stop|restart)
 - /countdown/(stop|restart) and /countdown/start?duration=XXSEC or /countdown/start?hour=XX&minute=XX&second=XX
-- /state?state=(on|off) `enable of disable the system`
+- /matrixActivated?matrixActivated=(on|off) `enable of disable the system`
 - /ram `Get the head free space`
 - /ram2 `Get the head fragmentation percentage`
 - /uptime `Get the uptime`

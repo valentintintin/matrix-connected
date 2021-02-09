@@ -9,7 +9,7 @@ const char PROGMEM dangoSong[] = "Dango:d=4,o=5,b=200:4f,4d#,2g#,2g#,2a#,2a#,3c.
 class AppletCountdown : public Applet {
 
 public:
-    explicit AppletCountdown(Orchestror* orchestror, byte idZone, uint64_t millisToCount);
+    explicit AppletCountdown(Orchestror *orchestror, uint64_t millisToCount);
     ~AppletCountdown();
 
     void pauseTimer();

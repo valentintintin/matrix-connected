@@ -1,10 +1,9 @@
 #include "AppletCountdown.h"
 
-AppletCountdown::AppletCountdown(Orchestror* orchestror, byte idZone, uint64_t millisToCount) : Applet(orchestror, idZone, PSTR("Countdown"), 10) {
+AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t millisToCount) : Applet(orchestror, PSTR("Countdown"), 20) {
 }
 
-AppletCountdown::~AppletCountdown() {
-}
+AppletCountdown::~AppletCountdown() = default;
 
 bool AppletCountdown::shouldBePaused(bool isAnimationFinished) {
     return !running;
