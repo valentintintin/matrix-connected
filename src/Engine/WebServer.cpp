@@ -1,11 +1,10 @@
 #include <NtpClientLib.h>
+#include <Applets/AppletCountdown.h>
 
 #include "Applets/AppletMessage.h"
 #include "WebServer.h"
 
 WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
-    Orchestror* orchestror = system->getOrchestorForZone(ZONE_RIGHT);
-
     server.on("/message/add", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/message/add\t"));
         if (request->hasArg("msg") && request->arg("msg").length() > 0) {
@@ -37,25 +36,25 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
 //        request->send(200, F("text/plain"), F("OK"));
 //    });
 //
-//    server.on("/countdown/start", HTTP_GET, [orchestror](AsyncWebServerRequest *request) {
+    server.on("/countdown/start", HTTP_GET, [system](AsyncWebServerRequest *request) {
 //        if (request->hasArg(F("duration"))) {
 //            slideCountdown.restart((uint64_t) request->arg(F("duration")).toInt());
 //            screen->setMainApplet(&slideCountdown);
 //            request->send(201, F("text/plain"), F("OK"));
 //        } else {
-//            uint64_t toDate = request->hasArg(F("day")) ? request->arg(F("day")).toInt() * 88400 : 0;
-//            toDate += request->hasArg(F("hour")) ? request->arg(F("hour")).toInt() * 3600 : 0;
-//            toDate += request->hasArg(F("minute")) ? request->arg(F("minute")).toInt() * 60 : 0;
-//            toDate += request->hasArg(F("second")) ? request->arg(F("second")).toInt() : 0;
-//            if (toDate > 0) {
-//                slideCountdown.restart(toDate);
-//                screen->setMainApplet(&slideCountdown);
-//                request->send(201, F("text/plain"), F("OK"));
-//            } else {
-//                request->send(400, F("text/plain"), F("Missing matrixActivated parameter in query (on|off)"));
-//            }
+            uint64_t toDate = request->hasArg(F("day")) ? request->arg(F("day")).toInt() * 88400 : 0;
+            toDate += request->hasArg(F("hour")) ? request->arg(F("hour")).toInt() * 3600 : 0;
+            toDate += request->hasArg(F("minute")) ? request->arg(F("minute")).toInt() * 60 : 0;
+            toDate += request->hasArg(F("second")) ? request->arg(F("second")).toInt() : 0;
+            if (toDate > 0) {
+                Orchestror* orchestror = system->getOrchestorForZone(ZONE_LEFT);
+                orchestror->addApplet(new AppletCountdown(orchestror, toDate));
+                request->send(201, F("text/plain"), F("OK"));
+            } else {
+                request->send(400, F("text/plain"), F("Missing matrixActivated parameter in query (on|off)"));
+            }
 //        }
-//    });
+    });
 //
 //    server.on("/countdown/restart", HTTP_GET, [screen, this](AsyncWebServerRequest *request) {
 //        slideCountdown.start();

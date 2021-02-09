@@ -1,6 +1,7 @@
 #include "AppletCountdown.h"
 
-AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t millisToCount) : Applet(orchestror, PSTR("Countdown"), 20) {
+AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t secondToCount) : Applet(orchestror, PSTR("Countdown"), 10),
+    running(true), stopped(false), millisToCount(secondToCount * 1000), initTime(millis()) {
 }
 
 AppletCountdown::~AppletCountdown() = default;
@@ -22,9 +23,8 @@ void AppletCountdown::refresh() {
         if (lastTime - initTime < millisToCount) {
             millisToString(millisToCount - (lastTime - initTime), timeStr);
         } else {
-//            stop();
+            stopTimer();
 //            timer.restart();
-                strcpy_P(timeStr, PSTR("Fin !"));
 //            screen->setSongToPlay(dangoSong);
 //            screen->setBlink();
         }
@@ -44,12 +44,17 @@ void AppletCountdown::printSerial() {
 
 void AppletCountdown::stopTimer() {
     running = false;
+    stopped = true;
+
+    strcpy_P(timeStr, PSTR("Fin !"));
 }
 
 void AppletCountdown::resumeTimer() {
     running = true;
+    stopped = false;
 }
 
 void AppletCountdown::pauseTimer() {
     running = false;
+    stopped = false;
 }

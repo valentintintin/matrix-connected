@@ -39,30 +39,39 @@ void millisToString(uint64_t milliseconds, String *timeString) {
 }
 
 void millisToString(uint64_t milliseconds, char *timeString) {
+    strcpy_P(timeString, PSTR(""));
+
+    DPRINT(F("[millisToString]")); DPRINT(F("millisSource: ")); DPRINT((uint16_t) milliseconds);
+
     uint64_t seconds = milliseconds / 1000;
     milliseconds %= 1000;
+    DPRINT(F(" millis: ")); DPRINT((uint16_t) milliseconds);
 
     auto minutes = (uint64_t) (seconds / 60);
     seconds %= 60;
+    DPRINT(F(" seconds: ")); DPRINT((uint8_t) seconds);
 
     auto hours = (uint64_t) (minutes / 60);
     minutes %= 60;
+    DPRINT(F(" minutes: ")); DPRINT((uint8_t) minutes);
 
     auto days = (uint64_t) (hours / 24);
+    DPRINT(F(" days: ")); DPRINT((uint8_t) days);
+
     hours %= 24;
+    DPRINT(F(" hours: ")); DPRINT((uint8_t) hours);
 
     if (days > 0) {
-        sprintf(timeString, "%dJ ", (uint8_t) days);
-    }
-    if (days > 0 || hours > 0) {
-        sprintf(timeString, "%s%02d:", timeString, (uint8_t) hours);
+        sprintf_P(timeString, PSTR("%dJ %02d"), (uint8_t) days, (uint8_t) hours);
+    } else if (hours > 0) {
+        sprintf_P(timeString, PSTR("%02d:%02d:%02d"), (uint8_t) hours, (uint8_t) minutes, (uint8_t) seconds);
+    } else if (minutes > 0) {
+        sprintf_P(timeString, PSTR("%02d:%02d,%hu"), (uint8_t) minutes, (uint8_t) seconds, (uint16_t) milliseconds);
+    } else {
+        sprintf_P(timeString, PSTR("%02d,%hu"), (uint8_t) seconds, (uint16_t) milliseconds);
     }
 
-    sprintf(timeString, "%s%02d:%02d", timeString, (uint8_t) minutes, (uint8_t) seconds);
-
-    if (days == 0) {
-        sprintf(timeString, "%s,%hu", timeString, (uint16_t) milliseconds);
-    }
+    DPRINT(F(" timeString: ")); DPRINTLN(timeString);
 }
 
 uint8_t utf8Ascii(uint8_t ascii)
@@ -151,7 +160,7 @@ String utf8ascii(String &s)
     String r = "";
     char c;
 
-    for (int i=0; i<s.length(); i++)
+    for (unsigned int i = 0; i < s.length(); i++)
     {
         c = utf8Ascii(s.charAt(i));
         if (c != '\0') {
