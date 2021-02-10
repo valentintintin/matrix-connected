@@ -63,22 +63,22 @@ void System::update() {
         for (auto orchestror : orchestrors) {
             orchestror->update();
         }
+
+        if (enableDong && minute() == 0 && second() == 0) {
+            if (!hasDong) {
+                dong();
+                hasDong = true;
+            }
+        } else {
+            hasDong = false;
+        }
+
+        if (!rtttl::done()) {
+            rtttl::play();
+        }
     } else {
         // fake delay for CPU stress
         delay(matrix->getSpeed());
-    }
-
-    if (enableDong && hour() != 0 && minute() == 0 && second() == 0) {
-        if (!hasDong) {
-            dong();
-            hasDong = true;
-        }
-    } else {
-        hasDong = false;
-    }
-
-    if (!rtttl::done()) {
-        rtttl::play();
     }
 }
 
