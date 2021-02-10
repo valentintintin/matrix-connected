@@ -6,12 +6,8 @@ class Timer {
 public:
     Timer(unsigned long interval, bool hasExpired = false);
 
-    ~Timer();
-
     void restart();
-
     void setExpired();
-
     bool hasExpired();
 
     unsigned long getTimeLeft();

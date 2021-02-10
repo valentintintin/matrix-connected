@@ -23,6 +23,8 @@ public:
     void resumeApplet(Applet* applet);
     void destroyApplet(byte iApplet);
 
+    Applet* getAppletByType(const byte type);
+
     inline const byte getIdZone() const {
         return idZone;
     }

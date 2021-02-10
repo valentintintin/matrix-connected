@@ -9,8 +9,7 @@
 class AppletScreenSaver : public Applet {
 
 public:
-    explicit AppletScreenSaver(Orchestror* orchestror);
-    ~AppletScreenSaver();
+    AppletScreenSaver(Orchestror* orchestror);
 
     void onInit(MD_Parola* matrix) override;
 

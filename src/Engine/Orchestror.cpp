@@ -113,3 +113,15 @@ void Orchestror::destroyApplet(byte iApplet) {
 
     applets[iApplet] = nullptr;
 }
+
+Applet *Orchestror::getAppletByType(const byte type) {
+    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
+        Applet *applet = applets[i]; // Applet in this place
+
+        if (applet != nullptr && applet->getType() == type) {
+            return applet;
+        }
+    }
+
+    return nullptr;
+}

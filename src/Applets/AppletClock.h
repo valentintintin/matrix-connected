@@ -1,13 +1,12 @@
 #ifndef APPLET_CLOCK_H
 #define APPLET_CLOCK_H
 
-#include "../Engine/Applet.h"
+#include "Engine/Applet.h"
 
 class AppletClock : public Applet {
 
 public:
-    explicit AppletClock(Orchestror *orchestror);
-    ~AppletClock();
+    AppletClock(Orchestror *orchestror);
 
     void onResume(MD_Parola* matrix) override;
     bool shouldBePaused(bool isAnimationFinished) override;

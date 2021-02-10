@@ -8,13 +8,18 @@ class Orchestror;
 #include "Engine/Utils.h"
 #include "Orchestror.h"
 
+#define CLOCK 0
+#define HEART 1
+#define MESSAGE 2
+#define SCREEN_SAVER 3
+#define COUNTDOWN 4
+
 class Applet {
 
 public:
     static long APPLET_ID;
 
-    Applet(const Orchestror *orchestror, const char* name, byte priority = 0);
-    ~Applet();
+    Applet(Orchestror *orchestror, const char* name, const byte type, const byte priority = 0);
 
     virtual void onInit(MD_Parola *matrix);
     virtual void onPause();
@@ -39,6 +44,10 @@ public:
         return name;
     }
 
+    inline const byte getType() const {
+        return type;
+    }
+
     inline const uint16_t getStartColumn() const {
         return startColumn;
     }
@@ -55,10 +64,11 @@ public:
     virtual void draw(MD_Parola *matrix, bool isAnimationFinished) = 0;
 
 protected:
-    const Orchestror* orchestror;
+    Orchestror* orchestror;
 
 private:
     char name[16];
+    const byte type;
     const byte priority;
     const long id;
     bool displayed = false;

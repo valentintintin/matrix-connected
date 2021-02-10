@@ -1,17 +1,15 @@
 #include "AppletCountdown.h"
 
-AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t secondToCount) : Applet(orchestror, PSTR("Countdown"), 10),
-    running(true), stopped(false), millisToCount(secondToCount * 1000), initTime(millis()) {
+AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t secondToCount) : Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10),
+    running(true), millisToCount(secondToCount * 1000), initTime(millis()) {
 }
-
-AppletCountdown::~AppletCountdown() = default;
 
 bool AppletCountdown::shouldBePaused(bool isAnimationFinished) {
     return !running;
 }
 
 bool AppletCountdown::shouldBeDestroyed(bool isAnimationFinished) {
-    return stopped;
+    return !running;
 }
 
 void AppletCountdown::refresh() {
@@ -24,9 +22,7 @@ void AppletCountdown::refresh() {
             millisToString(millisToCount - (lastTime - initTime), timeStr);
         } else {
             stopTimer();
-//            timer.restart();
-//            screen->setSongToPlay(dangoSong);
-//            screen->setBlink();
+            orchestror->getSystem()->notify();
         }
     }
 }
@@ -42,19 +38,11 @@ void AppletCountdown::printSerial() {
     Applet::printSerial(); DPRINT(F("\tTime: ")); DPRINTLN(timeStr);
 }
 
-void AppletCountdown::stopTimer() {
+void AppletCountdown::stopTimer(bool forced) {
     running = false;
-    stopped = true;
 
-    strcpy_P(timeStr, PSTR("Fin !"));
-}
-
-void AppletCountdown::resumeTimer() {
-    running = true;
-    stopped = false;
-}
-
-void AppletCountdown::pauseTimer() {
-    running = false;
-    stopped = false;
+    if (!forced) {
+        orchestror->getSystem()->addMessage(String("Fin !"));
+        orchestror->getSystem()->notify();
+    }
 }

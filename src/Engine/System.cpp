@@ -1,3 +1,5 @@
+#include <NonBlockingRtttl.h>
+#include <Time.h>
 #include "System.h"
 #include "FontData.h"
 
@@ -6,8 +8,18 @@
 #include "Applets/AppletMessage.h"
 #include "Applets/AppletClock.h"
 
-System::System(MD_Parola *matrix) : matrix(matrix) {
+System::System(MD_Parola *matrix, bool enableDong, byte soundPin, byte ledPin) :
+    matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false), ledPin(ledPin), blinkTicker(new Ticker()) {
     DPRINTLN(F("[MATRIX]Start"));
+
+    if (soundPin != 255) {
+        pinMode(soundPin, OUTPUT);
+    }
+
+    if (ledPin != 255) {
+        pinMode(ledPin, OUTPUT);
+    }
+
     matrix->begin(3);
     matrix->setZone(ZONE_RIGHT, 0, 9);
     matrix->setZone(ZONE_LEFT, 10, 14);
@@ -16,6 +28,7 @@ System::System(MD_Parola *matrix) : matrix(matrix) {
     matrix->setPause(0);
     matrix->setSpeed(20);
     matrix->setFont(font);
+    setMatrixActivated(true);
 
     orchestrors[ZONE_HEART] = new Orchestror(this, (byte) ZONE_HEART);
     orchestrors[ZONE_LEFT] = new Orchestror(this, ZONE_LEFT);
@@ -25,8 +38,7 @@ System::System(MD_Parola *matrix) : matrix(matrix) {
     orchestrors[ZONE_HEART]->addApplet(new AppletHeart(orchestrors[ZONE_HEART]));
     orchestrors[ZONE_LEFT]->addApplet(new AppletClock(orchestrors[ZONE_LEFT]));
 
-    appletMessage = new AppletMessage(orchestrors[ZONE_RIGHT]);
-    orchestrors[ZONE_RIGHT]->addApplet(appletMessage);
+    orchestrors[ZONE_RIGHT]->addApplet(new AppletMessage(orchestrors[ZONE_RIGHT]));
     orchestrors[ZONE_RIGHT]->addApplet(new AppletScreenSaver(orchestrors[ZONE_RIGHT]));
 }
 
@@ -36,6 +48,10 @@ void System::setMatrixActivated(bool activated) {
     matrixActivated = activated;
 
     matrix->displayShutdown(!matrixActivated);
+
+    if (!activated && rtttl::isPlaying()) {
+        rtttl::stop();
+    }
 }
 
 void System::update() {
@@ -52,13 +68,80 @@ void System::update() {
         delay(matrix->getSpeed());
     }
 
-//    if (dongEnabled && hour() != 0 && minute() == 0 && second() == 0) {
-//        if (!hasDong) {
-//            screen->setSongToPlay(dong);
-//            screen->setBlink();
-//            hasDong = true;
-//        }
-//    } else {
-//        hasDong = false;
-//    }
+    if (enableDong && hour() != 0 && minute() == 0 && second() == 0) {
+        if (!hasDong) {
+            dong();
+            hasDong = true;
+        }
+    } else {
+        hasDong = false;
+    }
+
+    if (!rtttl::done()) {
+        rtttl::play();
+    }
+}
+
+void System::setSongToPlay(const char *song) {
+    if (soundPin != 255) {
+        strcpy_P(bufferSong, song);
+        rtttl::begin(soundPin, bufferSong);
+    }
+}
+
+void System::setLed(bool status) {
+    if (ledPin != 255) {
+        digitalWrite(ledPin, status);
+    }
+}
+
+void System::setBlink() {
+    if (ledPin != 255) {
+        setLed(LOW);
+        blinkCounter = 0;
+        blinkTicker->attach_ms(300, [this] {
+            this->blinkProcess();
+        });
+    }
+}
+
+void System::blinkProcess() {
+    digitalWrite(ledPin, !digitalRead(ledPin));
+
+    ++blinkCounter;
+    if (blinkCounter == 10) {
+        blinkTicker->detach();
+        blinkTicker->attach_ms(100, [this] {
+            this->blinkProcess();
+        });
+    } else if (blinkCounter == 30) {
+        blinkTicker->detach();
+        setLed(LOW);
+    }
+}
+
+
+bool System::addMessage(String messageToAdd) {
+    Orchestror* orchestror = getOrchestorForZone(ZONE_RIGHT);
+    Applet* applet = orchestror->getAppletByType(MESSAGE);
+
+    if (applet == nullptr) {
+        return false;
+    }
+
+    ((AppletMessage*) applet)->addMessage(messageToAdd);
+
+    return true;
+}
+
+void System::notify() {
+    DPRINTLN(F("[SYSTEM]Notify"));
+    setSongToPlay(dangoSong);
+    setBlink();
+}
+
+void System::dong() {
+    DPRINTLN(F("[SYSTEM]Dong"));
+    setSongToPlay(dongSong);
+    setBlink();
 }

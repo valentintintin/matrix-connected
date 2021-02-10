@@ -11,8 +11,7 @@
 class WebServer {
 
 public:
-    explicit WebServer(System* system);
-    ~WebServer();
+    WebServer(System* system);
 
     void begin();
 

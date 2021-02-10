@@ -2,14 +2,10 @@
 
 long Applet::APPLET_ID = 1;
 
-Applet::Applet(const Orchestror *orchestror, const char* name, byte priority) : orchestror(orchestror), priority(priority), id(APPLET_ID++) {
+Applet::Applet(Orchestror *orchestror, const char* name, const byte type, const byte priority) : orchestror(orchestror), type(type), priority(priority), id(APPLET_ID++) {
     strcpy_P(this->name, name);
     DPRINT(F("[APPLET NEW] ")); printSerial();
 }
-
-Applet::~Applet() {
-}
-
 
 void Applet::onInit(MD_Parola *matrix) {
     printSerial(); DPRINTLN(F("\tInitiated"));

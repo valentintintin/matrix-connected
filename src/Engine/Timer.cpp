@@ -9,10 +9,6 @@ Timer::Timer(unsigned long interval, bool hasExpired) : interval(interval) {
     }
 }
 
-
-Timer::~Timer() {
-}
-
 bool Timer::hasExpired() {
     return trigger || millis() - timeLast >= interval;
 }

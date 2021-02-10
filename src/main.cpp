@@ -15,7 +15,7 @@
 #define SOUND_PIN D1
 #define AP_SSID "PixelClock"
 
-System systemEngine(new MD_Parola(MD_MAX72XX::FC16_HW, CS_PIN, 16));
+System systemEngine(new MD_Parola(MD_MAX72XX::FC16_HW, CS_PIN, 16), true, SOUND_PIN, LED_PIN);
 
 WebServer webServer(&systemEngine);
 
@@ -32,10 +32,9 @@ void setup() {
     DPRINTLN(F("[PROGRAM]Start"));
 
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(LED_PIN, OUTPUT);
     DPRINTLN(F("[LED]High"));
     digitalWrite(LED_BUILTIN, LOW);
-    digitalWrite(LED_PIN, HIGH);
+    systemEngine.setLed(HIGH);
 
     DPRINTLN(F("[WIFI MANAGER]Start"));
     AsyncWiFiManager wifiManager(&webServer.server, &webServer.dns);
@@ -55,7 +54,7 @@ void setup() {
 //    orchestror->addApplet(new AppletMessage(orchestror, WiFi.localIP().toString()));
 
     digitalWrite(LED_BUILTIN, HIGH);
-    digitalWrite(LED_PIN, LOW);
+    systemEngine.setLed(LOW);
     DPRINTLN(F("[LED]Low"));
 
     DPRINTLN(F("[PROGRAM]OK"));

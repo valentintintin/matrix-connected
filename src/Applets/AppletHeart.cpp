@@ -1,9 +1,7 @@
 #include "AppletHeart.h"
 
-AppletHeart::AppletHeart(Orchestror *orchestror) : Applet(orchestror, PSTR("Heart")) {
+AppletHeart::AppletHeart(Orchestror *orchestror) : Applet(orchestror, PSTR("Heart"), HEART) {
 }
-
-AppletHeart::~AppletHeart() = default;
 
 bool AppletHeart::shouldBePaused(bool isAnimationFinished) {
     return false;

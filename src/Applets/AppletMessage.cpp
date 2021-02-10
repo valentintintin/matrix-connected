@@ -1,10 +1,8 @@
 #include "AppletMessage.h"
 
-AppletMessage::AppletMessage(Orchestror *orchestror) : Applet(orchestror, PSTR("Message"), 10) {
+AppletMessage::AppletMessage(Orchestror *orchestror) : Applet(orchestror, PSTR("Message"), MESSAGE, 10) {
     strcpy_P(message, PSTR(""));
 }
-
-AppletMessage::~AppletMessage() = default;
 
 bool AppletMessage::shouldBePaused(bool isAnimationFinished) {
     return isAnimationFinished && messages.count() == 0;

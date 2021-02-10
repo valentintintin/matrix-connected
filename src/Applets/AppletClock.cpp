@@ -2,10 +2,8 @@
 
 #include <NtpClientLib.h>
 
-AppletClock::AppletClock(Orchestror *orchestror) : Applet(orchestror, PSTR("Clock")) {
+AppletClock::AppletClock(Orchestror *orchestror) : Applet(orchestror, PSTR("Clock"), CLOCK) {
 }
-
-AppletClock::~AppletClock() = default;
 
 bool AppletClock::shouldBePaused(bool isAnimationFinished) {
     return false;

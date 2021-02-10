@@ -17,8 +17,7 @@ MD_MAX72XX::fontType_t hearts[] PROGMEM =
 class AppletHeart : public Applet {
 
 public:
-    explicit AppletHeart(Orchestror *orchestror);
-    ~AppletHeart();
+    AppletHeart(Orchestror *orchestror);
 
     void onResume(MD_Parola* matrix) override;
     bool shouldBePaused(bool isAnimationFinished) override;

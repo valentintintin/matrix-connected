@@ -11,8 +11,7 @@
 class AppletMessage : public Applet {
 
 public:
-    explicit AppletMessage(Orchestror *orchestror);
-    ~AppletMessage();
+    AppletMessage(Orchestror *orchestror);
 
     void onResume(MD_Parola *matrix) override;
     bool shouldBePaused(bool isAnimationFinished) override;
