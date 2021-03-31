@@ -2,6 +2,7 @@
 
 AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t secondToCount) : Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10),
     running(true), millisToCount(secondToCount * 1000), initTime(millis()) {
+    orchestror->getSystem()->alert();
 }
 
 bool AppletCountdown::shouldBePaused(bool isAnimationFinished) {

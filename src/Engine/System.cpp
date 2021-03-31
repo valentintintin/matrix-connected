@@ -64,7 +64,8 @@ void System::update() {
             orchestror->update();
         }
 
-        if (enableDong && minute() == 0 && second() == 0) {
+        time_t currentTime = now();
+        if (enableDong && minute(currentTime) == 0 && second(currentTime) == 0) {
             if (!hasDong) {
                 dong();
                 hasDong = true;
@@ -143,5 +144,11 @@ void System::notify() {
 void System::dong() {
     DPRINTLN(F("[SYSTEM]Dong"));
     setSongToPlay(dongSong);
+    setBlink();
+}
+
+void System::alert() {
+    DPRINTLN(F("[SYSTEM]Alert"));
+    setSongToPlay(alertSong);
     setBlink();
 }

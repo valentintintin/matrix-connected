@@ -24,21 +24,35 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     });
 
     server.on("/countdown/start", HTTP_GET, [system](AsyncWebServerRequest *request) {
+        Orchestror* orchestror = system->getOrchestorForZone(ZONE_LEFT);
+        Applet* applet = orchestror->getAppletByType(COUNTDOWN);
+        if (applet != nullptr) {
+            request->send(403, F("text/plain"), F("There is already a countdown. Stop it before add a new one"));
+            return;
+        }
+
+        if (request->hasArg("name") && request->arg("name").length() > 0) {
+            String name = request->arg("name");
+            DPRINT(F("Name: ")); DPRINTLN(name);
+
+            if (!system->addMessage(name)) {
+                DPRINTLN(F("Impossible to get applet message"));
+            }
+        }
+
         if (request->hasArg(F("duration"))) {
-            Orchestror* orchestror = system->getOrchestorForZone(ZONE_LEFT);
             orchestror->addApplet(new AppletCountdown(orchestror, (uint64_t) request->arg(F("duration")).toInt()));
             request->send(201, F("text/plain"), F("OK"));
         } else {
-            uint64_t toDate = request->hasArg(F("day")) ? request->arg(F("day")).toInt() * 88400 : 0;
+            uint64_t toDate = request->hasArg(F("day")) ? request->arg(F("day")).toInt() * 86400 : 0;
             toDate += request->hasArg(F("hour")) ? request->arg(F("hour")).toInt() * 3600 : 0;
             toDate += request->hasArg(F("minute")) ? request->arg(F("minute")).toInt() * 60 : 0;
             toDate += request->hasArg(F("second")) ? request->arg(F("second")).toInt() : 0;
             if (toDate > 0) {
-                Orchestror* orchestror = system->getOrchestorForZone(ZONE_LEFT);
                 orchestror->addApplet(new AppletCountdown(orchestror, toDate));
                 request->send(201, F("text/plain"), F("OK"));
             } else {
-                request->send(400, F("text/plain"), F("Missing duration or day/hour/minute/second parameter in query"));
+                request->send(400, F("text/plain"), F("Missing duration or day/hour/minute/second/duration(sec) or name(optional) parameter in query"));
             }
         }
     });
@@ -92,6 +106,12 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     server.on("/notify/song", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/song\t"));
         system->notify();
+        request->send(201, F("text/plain"), F("OK"));
+    });
+
+    server.on("/notify/alert", HTTP_GET, [system](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/notify/alert\t"));
+        system->alert();
         request->send(201, F("text/plain"), F("OK"));
     });
 

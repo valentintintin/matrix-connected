@@ -13,7 +13,8 @@
 #define ZONE_LEFT 1
 #define ZONE_RIGHT 2
 
-const char PROGMEM dongSong[] = "dong:d=10,o=6,b=180,c,e,g";
+const char PROGMEM dongSong[] = "Dong:d=8,o=6,b=180:c,e,g";
+const char PROGMEM alertSong[] = "Alert:d=8,o=5,b=250:c,c#,e,e#,g,g#";
 const char PROGMEM dangoSong[] = "Dango:d=4,o=5,b=200:4f,4d#,2g#,2g#,2a#,2a#,3c.6,2g#,2d#,4f,4d#,2g#,2g#,2a#,2a#,4c6,4c6,2g#.,4f,4d#,2g#,2g#,2a#,2a#,3c.6,2g#,2d#,4f,4d#,2g#,2g#,4a#,4a#,4g#";
 
 class System {
@@ -29,6 +30,7 @@ public:
 
     void notify();
     void dong();
+    void alert();
 
     bool addMessage(String messageToAdd);
 
