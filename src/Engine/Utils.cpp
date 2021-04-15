@@ -45,21 +45,21 @@ void millisToString(uint64_t milliseconds, char *timeString) {
 
     uint64_t seconds = milliseconds / 1000;
     milliseconds %= 1000;
-    DPRINT(F(" millis: ")); DPRINT((uint16_t) milliseconds);
+    DPRINT(F(", millis: ")); DPRINT((uint16_t) milliseconds);
 
     auto minutes = (uint64_t) (seconds / 60);
     seconds %= 60;
-    DPRINT(F(" seconds: ")); DPRINT((uint8_t) seconds);
+    DPRINT(F(", seconds: ")); DPRINT((uint8_t) seconds);
 
     auto hours = (uint64_t) (minutes / 60);
     minutes %= 60;
-    DPRINT(F(" minutes: ")); DPRINT((uint8_t) minutes);
+    DPRINT(F(", minutes: ")); DPRINT((uint8_t) minutes);
 
     auto days = (uint64_t) (hours / 24);
-    DPRINT(F(" days: ")); DPRINT((uint8_t) days);
+    DPRINT(F(", days: ")); DPRINT((uint8_t) days);
 
     hours %= 24;
-    DPRINT(F(" hours: ")); DPRINT((uint8_t) hours);
+    DPRINT(F(", hours: ")); DPRINT((uint8_t) hours);
 
     if (days > 0) {
         sprintf_P(timeString, PSTR("%dJ %02d:%02d"), (uint8_t) days, (uint8_t) hours, (uint8_t) minutes);
@@ -67,11 +67,11 @@ void millisToString(uint64_t milliseconds, char *timeString) {
         sprintf_P(timeString, PSTR("%02d:%02d:%02d"), (uint8_t) hours, (uint8_t) minutes, (uint8_t) seconds);
     } else if (minutes > 0) {
         sprintf_P(timeString, PSTR("%02d:%02d,%0hu"), (uint8_t) minutes, (uint8_t) seconds, (uint16_t) milliseconds / 100);
-    } else { // todo check %2hu
+    } else {
         sprintf_P(timeString, PSTR("%02d,%0hu"), (uint8_t) seconds, (uint16_t) milliseconds / 100);
     }
 
-    DPRINT(F(" timeString: ")); DPRINTLN(timeString);
+    DPRINT(F(", timeString: ")); DPRINTLN(timeString);
 }
 
 uint8_t utf8Ascii(uint8_t ascii)

@@ -13,9 +13,19 @@
 #define ZONE_LEFT 1
 #define ZONE_RIGHT 2
 
+#define MAX_LENGTH_SONG 255
 const char PROGMEM dongSong[] = "Dong:d=8,o=6,b=180:c,e,g";
-const char PROGMEM alertSong[] = "Alert:d=8,o=5,b=250:c,c#,e,e#,g,g#";
+const char PROGMEM alertSong[] = "Alert:d=8,o=5,b=120:c,c#,e,e#,g,g#";
 const char PROGMEM dangoSong[] = "Dango:d=4,o=5,b=200:4f,4d#,2g#,2g#,2a#,2a#,3c.6,2g#,2d#,4f,4d#,2g#,2g#,2a#,2a#,4c6,4c6,2g#.,4f,4d#,2g#,2g#,2a#,2a#,3c.6,2g#,2d#,4f,4d#,2g#,2g#,4a#,4a#,4g#";
+
+const char PROGMEM monday[] = "Lundi";
+const char PROGMEM tuesday[] = "Mardi";
+const char PROGMEM wednesday[] = "Mercredi";
+const char PROGMEM thursday[] = "Jeudi";
+const char PROGMEM friday[] = "Vendredi";
+const char PROGMEM saturday[] = "Samedi";
+const char PROGMEM sunday[] = "Dimanche";
+const char* const PROGMEM weekDays[] = { sunday, monday, tuesday, wednesday, thursday, friday, saturday };
 
 class System {
 public:
@@ -25,7 +35,7 @@ public:
     void update();
 
     void setSongToPlay(const char *song);
-    void setLed(bool status);
+    void setLed(bool status) const;
     void setBlink();
 
     void notify();
@@ -33,6 +43,7 @@ public:
     void alert();
 
     bool addMessage(String messageToAdd);
+    bool addMessage(char* messageToAdd);
 
     inline const bool isMatrixActivated() const {
         return matrixActivated;
@@ -52,7 +63,7 @@ private:
 
     byte soundPin;
     bool enableDong, hasDong;
-    char bufferSong[255];
+    char bufferSong[MAX_LENGTH_SONG], dateStr[32];
 
     byte ledPin;
     Ticker* blinkTicker;
@@ -61,6 +72,7 @@ private:
     Orchestror* orchestrors[NB_MAX_ORCHESTROR];
 
     void blinkProcess();
+    void showDateMessage();
 };
 
 

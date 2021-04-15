@@ -1,5 +1,6 @@
 #include <NonBlockingRtttl.h>
 #include <Time.h>
+#include <NtpClientLib.h>
 #include "System.h"
 #include "FontData.h"
 
@@ -24,7 +25,7 @@ System::System(MD_Parola *matrix, bool enableDong, byte soundPin, byte ledPin) :
     matrix->setZone(ZONE_RIGHT, 0, 9);
     matrix->setZone(ZONE_LEFT, 10, 14);
     matrix->setZone(ZONE_HEART, 15, 15);
-    matrix->setIntensity(3);
+    matrix->setIntensity(5);
     matrix->setPause(0);
     matrix->setSpeed(20);
     matrix->setFont(font);
@@ -68,6 +69,7 @@ void System::update() {
         if (enableDong && minute(currentTime) == 0 && second(currentTime) == 0) {
             if (!hasDong) {
                 dong();
+                showDateMessage();
                 hasDong = true;
             }
         } else {
@@ -90,7 +92,7 @@ void System::setSongToPlay(const char *song) {
     }
 }
 
-void System::setLed(bool status) {
+void System::setLed(bool status) const {
     if (ledPin != 255) {
         digitalWrite(ledPin, status);
     }
@@ -121,8 +123,20 @@ void System::blinkProcess() {
     }
 }
 
-
 bool System::addMessage(String messageToAdd) {
+    Orchestror* orchestror = getOrchestorForZone(ZONE_RIGHT);
+    Applet* applet = orchestror->getAppletByType(MESSAGE);
+
+    if (applet == nullptr) {
+        return false;
+    }
+
+    ((AppletMessage*) applet)->addMessage(messageToAdd);
+
+    return true;
+}
+
+bool System::addMessage(char* messageToAdd) {
     Orchestror* orchestror = getOrchestorForZone(ZONE_RIGHT);
     Applet* applet = orchestror->getAppletByType(MESSAGE);
 
@@ -151,4 +165,12 @@ void System::alert() {
     DPRINTLN(F("[SYSTEM]Alert"));
     setSongToPlay(alertSong);
     setBlink();
+}
+
+void System::showDateMessage() {
+    time_t moment = now();
+    dateStr[0] = '\0';
+    strcpy_P(dateStr, (char*)pgm_read_dword(&(weekDays[2]))); // Necessary casts and dereferencing, just copy.
+    sprintf_P(dateStr, PSTR("On est le %s %02d/%02d/%4d"), dateStr, day(moment), month(moment), year(moment));
+    addMessage(dateStr);
 }

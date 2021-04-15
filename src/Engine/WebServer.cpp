@@ -27,21 +27,18 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         Orchestror* orchestror = system->getOrchestorForZone(ZONE_LEFT);
         Applet* applet = orchestror->getAppletByType(COUNTDOWN);
         if (applet != nullptr) {
-            request->send(403, F("text/plain"), F("There is already a countdown. Stop it before add a new one"));
-            return;
-        }
-
-        if (request->hasArg("name") && request->arg("name").length() > 0) {
-            String name = request->arg("name");
-            DPRINT(F("Name: ")); DPRINTLN(name);
-
-            if (!system->addMessage(name)) {
-                DPRINTLN(F("Impossible to get applet message"));
+            if (request->hasArg(F("restart"))) {
+                ((AppletCountdown *) applet)->stopTimer(true);
+            } else {
+                request->send(403, F("text/plain"), F("There is already a countdown. Stop it before add a new one"));
+                return;
             }
         }
 
+        bool songAtTheEnd = !request->hasArg(F("noSongAtTheEnd"));
+
         if (request->hasArg(F("duration"))) {
-            orchestror->addApplet(new AppletCountdown(orchestror, (uint64_t) request->arg(F("duration")).toInt()));
+            orchestror->addApplet(new AppletCountdown(orchestror, (uint64_t) request->arg(F("duration")).toInt(), request->arg(F("name")), songAtTheEnd));
             request->send(201, F("text/plain"), F("OK"));
         } else {
             uint64_t toDate = request->hasArg(F("day")) ? request->arg(F("day")).toInt() * 86400 : 0;
@@ -49,7 +46,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
             toDate += request->hasArg(F("minute")) ? request->arg(F("minute")).toInt() * 60 : 0;
             toDate += request->hasArg(F("second")) ? request->arg(F("second")).toInt() : 0;
             if (toDate > 0) {
-                orchestror->addApplet(new AppletCountdown(orchestror, toDate));
+                orchestror->addApplet(new AppletCountdown(orchestror, toDate, request->arg(F("name")), songAtTheEnd));
                 request->send(201, F("text/plain"), F("OK"));
             } else {
                 request->send(400, F("text/plain"), F("Missing duration or day/hour/minute/second/duration(sec) or name(optional) parameter in query"));

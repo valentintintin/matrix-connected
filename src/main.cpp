@@ -50,8 +50,7 @@ void setup() {
     webServer.begin();
 
     Orchestror* orchestror = systemEngine.getOrchestorForZone(ZONE_RIGHT);
-//    orchestror->addApplet(new AppletMessage(orchestror, String(PSTR(AP_SSID))));
-//    orchestror->addApplet(new AppletMessage(orchestror, WiFi.localIP().toString()));
+    orchestror->getSystem()->addMessage(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
 
     digitalWrite(LED_BUILTIN, HIGH);
     systemEngine.setLed(LOW);
@@ -62,4 +61,6 @@ void setup() {
 
 void loop() {
     systemEngine.update();
+
+//    Serial.print(F("Heap: ")); Serial.println(ESP.getFreeHeap());
 }

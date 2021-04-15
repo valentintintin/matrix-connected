@@ -27,9 +27,8 @@ void Orchestror::update() {
                 continue;
             }
 
-            if (
-                    !applet->shouldBePaused(zoneFinished)
-                    && (currentApplet == nullptr || appletMaxPriority == nullptr || applet->getPriority() > appletMaxPriority->getPriority())
+            if (!applet->shouldBePaused(zoneFinished)
+                && (currentApplet == nullptr || appletMaxPriority == nullptr || applet->getPriority() > appletMaxPriority->getPriority())
             ) {
                 appletMaxPriority = applet;
             }
@@ -102,6 +101,10 @@ void Orchestror::destroyApplet(byte iApplet) {
     DPRINTLN(F("[ORCHESTROR]Destroy applet")); DPRINT(F("\t"));
 
     Applet* applet = applets[iApplet];
+
+    if (applet == currentApplet) {
+        currentApplet = nullptr;
+    }
 
     applet->onDestroy();
     nbApplets--;

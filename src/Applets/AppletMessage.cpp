@@ -41,6 +41,18 @@ void AppletMessage::addMessage(String messageToAdd) {
     }
 }
 
+void AppletMessage::addMessage(char* messageToAdd) {
+    Applet::printSerial(); DPRINT(F("\tAddMessage: ")); DPRINT(messageToAdd); DPRINT(F(", Nb message: ")); DPRINTLN(messages.count());
+
+    if (messages.count() < MAX_MESSAGES) {
+        char* messageToShow = (char*)malloc ((strlen(messageToAdd) + 1) * sizeof (char));
+        strcpy(messageToShow, messageToAdd);
+        messages.push(messageToShow);
+    } else {
+        DPRINTLN(F("Too much messages, leave it !"));
+    }
+}
+
 void AppletMessage::onResume(MD_Parola *matrix) {
     Applet::onResume(matrix);
 

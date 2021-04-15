@@ -20,6 +20,7 @@ public:
     void printSerial() override;
 
     void addMessage(String messageToAdd);
+    void addMessage(char* messageToAdd);
 
 private:
     char message[MAX_LENGTH_MESSAGE];
