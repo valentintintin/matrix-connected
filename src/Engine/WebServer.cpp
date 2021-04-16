@@ -97,19 +97,25 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     server.on("/notify/dong", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/dong\t"));
         system->dong();
-        request->send(201, F("text/plain"), F("OK"));
+        request->send(200, F("text/plain"), F("OK"));
     });
 
     server.on("/notify/song", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/song\t"));
         system->notify();
-        request->send(201, F("text/plain"), F("OK"));
+        request->send(200, F("text/plain"), F("OK"));
     });
 
     server.on("/notify/alert", HTTP_GET, [system](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/alert\t"));
         system->alert();
-        request->send(201, F("text/plain"), F("OK"));
+        request->send(200, F("text/plain"), F("OK"));
+    });
+
+    server.on("/message/date", HTTP_GET, [system](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/message/date\t"));
+        system->showDateMessage();
+        request->send(200, F("text/plain"), F("OK"));
     });
 
     server.on("/intensity", HTTP_GET, [system](AsyncWebServerRequest *request) {

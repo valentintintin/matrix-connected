@@ -24,6 +24,7 @@ private:
     uint64_t millisToCount, initTime, lastTime;
     char timeStr[16];
     char name[MAX_LENGTH_MESSAGE];
+    char buffer[MAX_LENGTH_MESSAGE + 16];
 };
 
 #endif

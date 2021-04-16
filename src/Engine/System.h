@@ -41,6 +41,7 @@ public:
     void notify();
     void dong();
     void alert();
+    void showDateMessage();
 
     bool addMessage(String messageToAdd);
     bool addMessage(char* messageToAdd);
@@ -63,7 +64,7 @@ private:
 
     byte soundPin;
     bool enableDong, hasDong;
-    char bufferSong[MAX_LENGTH_SONG], dateStr[32];
+    char bufferSong[MAX_LENGTH_SONG], dateStr[64], dayStr[8];
 
     byte ledPin;
     Ticker* blinkTicker;
@@ -72,7 +73,6 @@ private:
     Orchestror* orchestrors[NB_MAX_ORCHESTROR];
 
     void blinkProcess();
-    void showDateMessage();
 };
 
 

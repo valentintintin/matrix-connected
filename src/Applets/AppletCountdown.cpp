@@ -57,8 +57,6 @@ void AppletCountdown::stopTimer(bool forced) {
     running = false;
 
     if (!forced) {
-        char buffer[MAX_LENGTH_MESSAGE];
-
         if (strlen(name) > 1) {
             buffer[0] = '\0';
             sprintf_P(buffer, PSTR("Fin de %s !"), name);

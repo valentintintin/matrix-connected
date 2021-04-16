@@ -169,8 +169,9 @@ void System::alert() {
 
 void System::showDateMessage() {
     time_t moment = now();
-    dateStr[0] = '\0';
-    strcpy_P(dateStr, (char*)pgm_read_dword(&(weekDays[2]))); // Necessary casts and dereferencing, just copy.
-    sprintf_P(dateStr, PSTR("On est le %s %02d/%02d/%4d"), dateStr, day(moment), month(moment), year(moment));
+    dayStr[0] = '\0';
+    strcpy_P(dayStr, (char*) pgm_read_dword(&(weekDays[weekday(moment) - 1])));
+    sprintf_P(dateStr, PSTR("On est le %s %02d/%02d/%4d"), dayStr, day(moment), month(moment), year(moment));
+    Serial.println(dateStr);
     addMessage(dateStr);
 }
