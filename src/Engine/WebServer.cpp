@@ -24,7 +24,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     });
 
     server.on("/countdown/start", HTTP_GET, [system](AsyncWebServerRequest *request) {
-        Orchestror* orchestror = system->getOrchestorForZone(ZONE_LEFT);
+        Orchestror* orchestror = system->getOrchestorForZone(ZONE);
         Applet* applet = orchestror->getAppletByType(COUNTDOWN);
         if (applet != nullptr) {
             if (request->hasArg(F("restart"))) {
@@ -55,7 +55,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     });
 
     server.on("/countdown/stop", HTTP_GET, [system](AsyncWebServerRequest *request) {
-        Orchestror* orchestror = system->getOrchestorForZone(ZONE_LEFT);
+        Orchestror* orchestror = system->getOrchestorForZone(ZONE);
         Applet* applet = orchestror->getAppletByType(COUNTDOWN);
         if (applet == nullptr) {
             request->send(500, F("text/plain"), F("Impossible to get applet"));

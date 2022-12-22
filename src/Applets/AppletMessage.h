@@ -11,20 +11,23 @@
 class AppletMessage : public Applet {
 
 public:
-    AppletMessage(Orchestror *orchestror);
+    explicit AppletMessage(Orchestror *orchestror);
 
     void onResume(MD_Parola *matrix) override;
-    bool shouldBePaused(bool isAnimationFinished) override;
-    bool shouldBeDestroyed(bool isAnimationFinished) override;
-    void draw(MD_Parola *matrix, bool isAnimationFinished) override;
+    bool shouldBeResumed() override;
+    bool shouldBeDestroyed() override;
+    void draw(MD_Parola *matrix) override;
     void printSerial() override;
 
-    void addMessage(String messageToAdd);
-    void addMessage(char* messageToAdd);
+    void addMessage(const String& messageToAdd);
+    void addMessage(const char* messageToAdd);
 
 private:
-    char message[MAX_LENGTH_MESSAGE];
+    char message[MAX_LENGTH_MESSAGE]{};
     Queue<char*> messages = Queue<char*>(MAX_MESSAGES);
+    bool hasMessage = false;
+
+    void popMessage();
 };
 
 

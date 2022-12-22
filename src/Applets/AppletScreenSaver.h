@@ -9,20 +9,23 @@
 class AppletScreenSaver : public Applet {
 
 public:
-    AppletScreenSaver(Orchestror* orchestror);
+    explicit AppletScreenSaver(Orchestror* orchestror);
 
     void onInit(MD_Parola* matrix) override;
 
-    bool shouldBePaused(bool isAnimationFinished) override;
-    bool shouldBeDestroyed(bool isAnimationFinished) override;
-    void draw(MD_Parola *matrix, bool isAnimationFinished) override;
+    bool shouldBeResumed() override;
+    bool shouldBeDestroyed() override;
+    void draw(MD_Parola *matrix) override;
+    void doMoveDiagonal();
+    void doMoveNoDiagonal();
 
 private:
     void resetToGo();
 
     Timer timer;
-    uint16_t toGoColumn, toGoRow;
-    uint16_t currentRow, currentColumn;
+    bool moveDiagonal = false;
+    uint16_t toGoColumn{}, toGoRow{};
+    uint16_t currentRow{}, currentColumn{};
 };
 
 

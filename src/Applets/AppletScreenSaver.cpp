@@ -12,15 +12,15 @@ void AppletScreenSaver::onInit(MD_Parola *matrix) {
     resetToGo();
 }
 
-bool AppletScreenSaver::shouldBePaused(bool isAnimationFinished) {
+bool AppletScreenSaver::shouldBeResumed() {
+    return true;
+}
+
+bool AppletScreenSaver::shouldBeDestroyed() {
     return false;
 }
 
-bool AppletScreenSaver::shouldBeDestroyed(bool isAnimationFinished) {
-    return false;
-}
-
-void AppletScreenSaver::draw(MD_Parola *matrix, bool isAnimationFinished) {
+void AppletScreenSaver::draw(MD_Parola *matrix) {
     if (timer.hasExpired()) {
         timer.restart();
 
@@ -32,22 +32,45 @@ void AppletScreenSaver::draw(MD_Parola *matrix, bool isAnimationFinished) {
 
         matrix->getGraphicObject()->setPoint(currentRow, currentColumn, true);
 
-        if (currentRow < toGoRow) {
-            currentRow++;
-        } else if (currentRow > toGoRow) {
-            currentRow--;
-        } else if (currentColumn < toGoColumn) {
-            currentColumn++;
-        } else if (currentColumn > toGoColumn) {
-            currentColumn--;
+        if (moveDiagonal) {
+            doMoveDiagonal();
+        } else {
+            doMoveNoDiagonal();
         }
     }
 }
 
 void AppletScreenSaver::resetToGo() {
+    moveDiagonal = random(0, 2) == 0;
     toGoRow = random(0, 8);
     toGoColumn = random(
         toGoColumn - MAX_COLUMN_AWAY > getStartColumn() ? toGoColumn - MAX_COLUMN_AWAY : getStartColumn(),
         toGoColumn + MAX_COLUMN_AWAY < getEndColumn() ? toGoColumn + MAX_COLUMN_AWAY : getEndColumn()
     );
+}
+
+void AppletScreenSaver::doMoveNoDiagonal() {
+    if (currentRow < toGoRow) {
+        currentRow++;
+    } else if (currentRow > toGoRow) {
+        currentRow--;
+    } else if (currentColumn < toGoColumn) {
+        currentColumn++;
+    } else if (currentColumn > toGoColumn) {
+        currentColumn--;
+    }
+}
+
+void AppletScreenSaver::doMoveDiagonal() {
+    if (currentRow < toGoRow) {
+        currentRow++;
+    } else if (currentRow > toGoRow) {
+        currentRow--;
+    }
+
+    if (currentColumn < toGoColumn) {
+        currentColumn++;
+    } else if (currentColumn > toGoColumn) {
+        currentColumn--;
+    }
 }

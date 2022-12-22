@@ -17,12 +17,12 @@ MD_MAX72XX::fontType_t hearts[] PROGMEM =
 class AppletHeart : public Applet {
 
 public:
-    AppletHeart(Orchestror *orchestror);
+    explicit AppletHeart(Orchestror *orchestror);
 
     void onResume(MD_Parola* matrix) override;
-    bool shouldBePaused(bool isAnimationFinished) override;
-    bool shouldBeDestroyed(bool isAnimationFinished) override;
-    void draw(MD_Parola *matrix, bool isAnimationFinished) override;
+    bool shouldBeResumed() override;
+    bool shouldBeDestroyed() override;
+    void draw(MD_Parola *matrix) override;
     void printSerial() override;
 
 private:

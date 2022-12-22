@@ -10,43 +10,47 @@ void Orchestror::update() {
     DPRINT(F("[ORCHESTROR ")); DPRINT(idZone); DPRINT(F("]\r\n\t[UPDATE]")); DPRINT(F("NbApplets: ")); DPRINTLN(nbApplets);
 
     MD_Parola* matrix = system->getMatrix();
-    bool zoneFinished = matrix->getZoneStatus(idZone);
 
-    Applet* appletMaxPriority = nullptr;
-    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-        Applet *applet = applets[i];
+    if (matrix->getZoneStatus(idZone)) { // Zone animation finished
+        Applet *newApplet = nullptr;
+        for (byte i = 0; i < NB_MAX_APPLETS; i++) {
+            Applet *applet = applets[i];
 
-        if (applet != nullptr) {
-            DPRINT(F("\tBlock ")); DPRINT(i); DPRINT(F(", zoneFinished: ")); DPRINT(zoneFinished); DPRINT(F("\r\n\t\t")); applet->printSerial();
+            if (applet != nullptr) {
+                DPRINT(F("\tBlock ")); DPRINT(i); DPRINT(F("\r\n\t\t"));
+                applet->printSerial();
 
-            applet->refresh();
+                applet->refresh();
 
-            if (applet->shouldBeDestroyed(zoneFinished)) {
-                destroyApplet(i);
+                DPRINT(F("\t\tShould be destroyed: ")); DPRINTLN(applet->shouldBeDestroyed());
 
-                continue;
+                if (applet->shouldBeDestroyed()) {
+                    destroyApplet(i);
+                    continue;
+                }
+
+                DPRINT(F("\t\tShould be paused: ")); DPRINTLN(applet->shouldBeResumed());
+
+                if (applet->shouldBeResumed()
+                    && (newApplet == nullptr || applet->getPriority() >= newApplet->getPriority())
+                        ) {
+                    newApplet = applet;
+                    DPRINT(F("\tApplet max priority: ")); DPRINTLN(newApplet->getName());
+                }
             }
+        }
 
-            if (!applet->shouldBePaused(zoneFinished)
-                && (currentApplet == nullptr || appletMaxPriority == nullptr || applet->getPriority() > appletMaxPriority->getPriority())
-            ) {
-                appletMaxPriority = applet;
-            }
+        if (newApplet != nullptr) {
+            resumeApplet(newApplet);
+
+            DPRINT(F("\t[Draw]")); DPRINTLN(currentApplet->getName());
+            currentApplet->draw(matrix);
+        } else {
+            DPRINTLN(F("No applet"));
         }
     }
 
-    if (currentApplet == nullptr && appletMaxPriority != nullptr) {
-        resumeApplet(appletMaxPriority);
-    }
-
-    if (currentApplet != nullptr) {
-        if (appletMaxPriority != nullptr && currentApplet->getId() != appletMaxPriority->getId()) {
-            resumeApplet(appletMaxPriority);
-        }
-
-        DPRINTLN(F("\t[Draw]"));
-        currentApplet->draw(matrix, zoneFinished);
-    }
+    matrix->synchZoneStart();
 }
 
 void Orchestror::addApplet(Applet* applet) {
@@ -80,11 +84,13 @@ void Orchestror::addApplet(Applet* applet) {
 void Orchestror::resumeApplet(Applet* applet) {
     DPRINTLN(F("[ORCHESTROR]Resume applet")); DPRINT(F("\t"));
 
-    if (currentApplet != nullptr) {
-        pauseApplet(currentApplet);
-    }
+    if (applet != lastApplet) {
+        if (currentApplet != nullptr) {
+            pauseApplet(currentApplet);
+        }
 
-    applet->onResume(system->getMatrix());
+        applet->onResume(system->getMatrix());
+    }
 
     currentApplet = applet;
 }
@@ -94,6 +100,7 @@ void Orchestror::pauseApplet(Applet* applet, bool displayNext) {
 
     applet->onPause();
 
+    lastApplet = applet;
     currentApplet = nullptr;
 }
 

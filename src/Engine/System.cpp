@@ -21,26 +21,17 @@ System::System(MD_Parola *matrix, bool enableDong, byte soundPin, byte ledPin) :
         pinMode(ledPin, OUTPUT);
     }
 
-    matrix->begin(3);
-    matrix->setZone(ZONE_RIGHT, 0, 9);
-    matrix->setZone(ZONE_LEFT, 10, 14);
-    matrix->setZone(ZONE_HEART, 15, 15);
-    matrix->setIntensity(5);
-    matrix->setPause(0);
-    matrix->setSpeed(20);
+    matrix->begin(NB_MAX_ORCHESTROR);
+    matrix->setZone(ZONE, 0, 7);
+    matrix->setIntensity(1);
     matrix->setFont(font);
     setMatrixActivated(true);
 
-    orchestrors[ZONE_HEART] = new Orchestror(this, (byte) ZONE_HEART);
-    orchestrors[ZONE_LEFT] = new Orchestror(this, ZONE_LEFT);
-    orchestrors[ZONE_RIGHT] = new Orchestror(this, ZONE_RIGHT);
+    orchestrors[ZONE] = new Orchestror(this, (byte) ZONE);
 
     DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
-    orchestrors[ZONE_HEART]->addApplet(new AppletHeart(orchestrors[ZONE_HEART]));
-    orchestrors[ZONE_LEFT]->addApplet(new AppletClock(orchestrors[ZONE_LEFT]));
-
-    orchestrors[ZONE_RIGHT]->addApplet(new AppletMessage(orchestrors[ZONE_RIGHT]));
-    orchestrors[ZONE_RIGHT]->addApplet(new AppletScreenSaver(orchestrors[ZONE_RIGHT]));
+    orchestrors[ZONE]->addApplet(new AppletClock(orchestrors[ZONE]));
+    orchestrors[ZONE]->addApplet(new AppletMessage(orchestrors[ZONE]));
 }
 
 void System::setMatrixActivated(bool activated) {
@@ -76,7 +67,7 @@ void System::update() {
             hasDong = false;
         }
 
-        if (!rtttl::done()) {
+        if (rtttl::isPlaying()) {
             rtttl::play();
         }
     } else {
@@ -86,7 +77,7 @@ void System::update() {
 }
 
 void System::setSongToPlay(const char *song) {
-    if (soundPin != 255) {
+    if (soundPin != 255 && rtttl::done()) {
         strcpy_P(bufferSong, song);
         rtttl::begin(soundPin, bufferSong);
     }
@@ -123,8 +114,8 @@ void System::blinkProcess() {
     }
 }
 
-bool System::addMessage(String messageToAdd) {
-    Orchestror* orchestror = getOrchestorForZone(ZONE_RIGHT);
+bool System::addMessage(const String& messageToAdd) {
+    Orchestror* orchestror = getOrchestorForZone(ZONE);
     Applet* applet = orchestror->getAppletByType(MESSAGE);
 
     if (applet == nullptr) {
@@ -136,8 +127,8 @@ bool System::addMessage(String messageToAdd) {
     return true;
 }
 
-bool System::addMessage(char* messageToAdd) {
-    Orchestror* orchestror = getOrchestorForZone(ZONE_RIGHT);
+bool System::addMessage(const char* messageToAdd) {
+    Orchestror* orchestror = getOrchestorForZone(ZONE);
     Applet* applet = orchestror->getAppletByType(MESSAGE);
 
     if (applet == nullptr) {
@@ -172,6 +163,5 @@ void System::showDateMessage() {
     dayStr[0] = '\0';
     strcpy_P(dayStr, (char*) pgm_read_dword(&(weekDays[weekday(moment) - 1])));
     sprintf_P(dateStr, PSTR("On est le %s %02d/%02d/%4d"), dayStr, day(moment), month(moment), year(moment));
-    Serial.println(dateStr);
     addMessage(dateStr);
 }

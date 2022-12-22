@@ -7,11 +7,9 @@
 #include "Orchestror.h"
 #include "Utils.h"
 
-#define NB_MAX_ORCHESTROR 3
+#define NB_MAX_ORCHESTROR 1
 
-#define ZONE_HEART 0
-#define ZONE_LEFT 1
-#define ZONE_RIGHT 2
+#define ZONE 0
 
 #define MAX_LENGTH_SONG 255
 const char PROGMEM dongSong[] = "Dong:d=8,o=6,b=180:c,e,g";
@@ -29,7 +27,7 @@ const char* const PROGMEM weekDays[] = { sunday, monday, tuesday, wednesday, thu
 
 class System {
 public:
-    System(MD_Parola *matrix, bool enableDong = false, byte soundPin = 255, byte ledPin = 255);
+    explicit System(MD_Parola *matrix, bool enableDong = false, byte soundPin = 255, byte ledPin = 255);
 
     void setMatrixActivated(bool activated);
     void update();
@@ -43,10 +41,10 @@ public:
     void alert();
     void showDateMessage();
 
-    bool addMessage(String messageToAdd);
-    bool addMessage(char* messageToAdd);
+    bool addMessage(const String& messageToAdd);
+    bool addMessage(const char* messageToAdd);
 
-    inline const bool isMatrixActivated() const {
+    inline bool isMatrixActivated() const {
         return matrixActivated;
     }
 

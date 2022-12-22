@@ -2,7 +2,7 @@
 
 AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t secondToCount, String name, bool songAtTheEnd)
 : Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10),
-running(true), millisToCount(secondToCount * 1000), songAtTheEnd(songAtTheEnd), initTime(millis()) {
+running(true), songAtTheEnd(songAtTheEnd), millisToCount(secondToCount * 1000), initTime(millis()) {
     utf8ascii(name).toCharArray(this->name, name.length() + 1);
 
     if (!orchestror->getSystem()->addMessage(this->name)) {
@@ -12,11 +12,11 @@ running(true), millisToCount(secondToCount * 1000), songAtTheEnd(songAtTheEnd), 
     orchestror->getSystem()->alert();
 }
 
-bool AppletCountdown::shouldBePaused(bool isAnimationFinished) {
-    return !running;
+bool AppletCountdown::shouldBeResumed() {
+    return running;
 }
 
-bool AppletCountdown::shouldBeDestroyed(bool isAnimationFinished) {
+bool AppletCountdown::shouldBeDestroyed() {
     return !running;
 }
 
@@ -42,11 +42,8 @@ void AppletCountdown::refresh() {
     }
 }
 
-void AppletCountdown::draw(MD_Parola *matrix, bool isAnimationFinished) {
-    if (isAnimationFinished) {
-        matrix->displayReset(getIdZone());
-        matrix->displayZoneText(getIdZone(), timeStr, PA_LEFT, matrix->getSpeed(), 0,PA_PRINT, PA_NO_EFFECT);
-    }
+void AppletCountdown::draw(MD_Parola *matrix) {
+    matrix->displayZoneText(getIdZone(), timeStr, PA_CENTER, 0, 25,PA_PRINT, PA_PRINT);
 }
 
 void AppletCountdown::printSerial() {
@@ -61,7 +58,7 @@ void AppletCountdown::stopTimer(bool forced) {
             buffer[0] = '\0';
             sprintf_P(buffer, PSTR("Fin de %s !"), name);
         } else {
-            sprintf_P(buffer, PSTR("Fin !"));
+            strcpy_P(buffer, PSTR("Fin !"));
         }
         orchestror->getSystem()->addMessage(buffer);
 

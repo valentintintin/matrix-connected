@@ -11,11 +11,11 @@
 #include "Engine/Utils.h"
 
 #define CS_PIN D8
-#define LED_PIN D0
-#define SOUND_PIN D1
-#define AP_SSID "PixelClock"
+#define LED_PIN 255
+#define SOUND_PIN 255
+#define AP_SSID "Horloge Willyam"
 
-System systemEngine(new MD_Parola(MD_MAX72XX::FC16_HW, CS_PIN, 16), true, SOUND_PIN, LED_PIN);
+System systemEngine(new MD_Parola(MD_MAX72XX::ICSTATION_HW, CS_PIN, 8), false, SOUND_PIN, LED_PIN);
 
 WebServer webServer(&systemEngine);
 
@@ -49,8 +49,9 @@ void setup() {
 
     webServer.begin();
 
-    Orchestror* orchestror = systemEngine.getOrchestorForZone(ZONE_RIGHT);
+    Orchestror* orchestror = systemEngine.getOrchestorForZone(ZONE);
     orchestror->getSystem()->addMessage(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
+    DPRINTLN(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
 
     digitalWrite(LED_BUILTIN, HIGH);
     systemEngine.setLed(LOW);

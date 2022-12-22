@@ -6,16 +6,16 @@
 class AppletClock : public Applet {
 
 public:
-    AppletClock(Orchestror *orchestror);
+    explicit AppletClock(Orchestror *orchestror);
 
-    void onResume(MD_Parola* matrix) override;
-    bool shouldBePaused(bool isAnimationFinished) override;
-    bool shouldBeDestroyed(bool isAnimationFinished) override;
-    void draw(MD_Parola *matrix, bool isAnimationFinished) override;
+    void refresh() override;
+    bool shouldBeResumed() override;
+    bool shouldBeDestroyed() override;
+    void draw(MD_Parola *matrix) override;
     void printSerial() override;
 
 private:
-    char timeStr[10];
+    char timeStr[10]{};
 };
 
 #endif

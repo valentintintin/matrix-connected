@@ -23,9 +23,9 @@ public:
     void resumeApplet(Applet* applet);
     void destroyApplet(byte iApplet);
 
-    Applet* getAppletByType(const byte type);
+    Applet* getAppletByType(byte type);
 
-    inline const byte getIdZone() const {
+    inline byte getIdZone() const {
         return idZone;
     }
 
@@ -37,6 +37,7 @@ private:
     const byte idZone;
     byte nbApplets = 0;
     Applet* currentApplet = nullptr;
+    Applet* lastApplet = nullptr;
     Applet* applets[NB_MAX_APPLETS];
     System* system;
 };

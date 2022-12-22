@@ -1,60 +1,59 @@
 #include "AppletMessage.h"
 
-AppletMessage::AppletMessage(Orchestror *orchestror) : Applet(orchestror, PSTR("Message"), MESSAGE, 10) {
-    strcpy_P(message, PSTR(""));
+AppletMessage::AppletMessage(Orchestror *orchestror) : Applet(orchestror, PSTR("Message"), MESSAGE, 15) {
+    message[0] = '\0';
 }
 
-bool AppletMessage::shouldBePaused(bool isAnimationFinished) {
-    return isAnimationFinished && messages.count() == 0;
+bool AppletMessage::shouldBeResumed() {
+    return hasMessage;
 }
 
-bool AppletMessage::shouldBeDestroyed(bool isAnimationFinished) {
+bool AppletMessage::shouldBeDestroyed() {
     return false;
 }
 
-void AppletMessage::draw(MD_Parola *matrix, bool isAnimationFinished) {
-    if (isAnimationFinished && messages.count() > 0) {
-        char* newMessage = messages.pop();
-        DPRINT(F("New message: ")); DPRINTLN(newMessage); DPRINT(F(", Nb message: ")); DPRINTLN(messages.count());
-
-        strcpy(this->message, newMessage);
-
-        delete newMessage;
-
-        matrix->displayReset(getIdZone());
+void AppletMessage::draw(MD_Parola *matrix) {
+    if (messages.count() > 0) {
+        popMessage();
+        matrix->displayZoneText(getIdZone(), message, PA_LEFT, 25, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+    } else {
+        hasMessage = false;
+        message[0] = '\0';
     }
 }
 
 void AppletMessage::printSerial() {
-    Applet::printSerial(); DPRINT(F("\tMessage: ")); DPRINT(message); DPRINT(F(", Nb message: ")); DPRINTLN(messages.count());
+    Applet::printSerial(); DPRINT(F("\tMessage: ")); DPRINT(message); DPRINT(F(", Nb message: ")); DPRINT(messages.count()); DPRINT(F(", Has messages: ")); DPRINTLN(hasMessage);
 }
 
-void AppletMessage::addMessage(String messageToAdd) {
-    Applet::printSerial(); DPRINT(F("\tAddMessage: ")); DPRINT(messageToAdd); DPRINT(F(", Nb message: ")); DPRINTLN(messages.count());
-
-    if (messages.count() < MAX_MESSAGES) {
-        char* messageToShow = (char*)malloc ((messageToAdd.length() + 1) * sizeof (char));;
-        utf8ascii(messageToAdd).toCharArray(messageToShow, messageToAdd.length() + 1);
-        messages.push(messageToShow);
-    } else {
-        DPRINTLN(F("Too much messages, leave it !"));
-    }
+void AppletMessage::addMessage(const String& messageToAdd) {
+    addMessage(messageToAdd.c_str());
 }
 
-void AppletMessage::addMessage(char* messageToAdd) {
-    Applet::printSerial(); DPRINT(F("\tAddMessage: ")); DPRINT(messageToAdd); DPRINT(F(", Nb message: ")); DPRINTLN(messages.count());
+void AppletMessage::addMessage(const char* messageToAdd) {
+    Applet::printSerial(); DPRINT(F("\tAddMessage: ")); DPRINT(messageToAdd); DPRINT(F(", Nb message: ")); DPRINT(messages.count()); DPRINT(F(", Has messages: ")); DPRINTLN(hasMessage);
 
     if (messages.count() < MAX_MESSAGES) {
         char* messageToShow = (char*)malloc ((strlen(messageToAdd) + 1) * sizeof (char));
         strcpy(messageToShow, messageToAdd);
+
         messages.push(messageToShow);
+        hasMessage = true;
     } else {
         DPRINTLN(F("Too much messages, leave it !"));
     }
 }
 
+void AppletMessage::popMessage() {
+    char* newMessage = messages.pop();
+    DPRINT(F("New message: ")); DPRINTLN(newMessage); DPRINT(F(", Nb message: ")); DPRINT(messages.count()); DPRINT(F(", Has messages: ")); DPRINTLN(hasMessage);
+
+    strcpy(this->message, newMessage);
+
+    delete newMessage;
+}
+
 void AppletMessage::onResume(MD_Parola *matrix) {
     Applet::onResume(matrix);
-
-    matrix->displayZoneText(getIdZone(), message, PA_LEFT, 25, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+//    matrix->setTextBuffer(getIdZone(), "");
 }

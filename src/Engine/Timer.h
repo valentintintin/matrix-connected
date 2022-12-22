@@ -4,7 +4,7 @@
 class Timer {
 
 public:
-    Timer(unsigned long interval, bool hasExpired = false);
+    explicit Timer(unsigned long interval, bool hasExpired = false);
 
     void restart();
     void setExpired();

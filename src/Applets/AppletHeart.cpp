@@ -3,24 +3,23 @@
 AppletHeart::AppletHeart(Orchestror *orchestror) : Applet(orchestror, PSTR("Heart"), HEART) {
 }
 
-bool AppletHeart::shouldBePaused(bool isAnimationFinished) {
+bool AppletHeart::shouldBeResumed() {
+    return true;
+}
+
+bool AppletHeart::shouldBeDestroyed() {
     return false;
 }
 
-bool AppletHeart::shouldBeDestroyed(bool isAnimationFinished) {
-    return false;
-}
+void AppletHeart::draw(MD_Parola *matrix) {
+    currentHeart++;
+    currentHeart %= 4;
 
-void AppletHeart::draw(MD_Parola *matrix, bool isAnimationFinished) {
-    if (isAnimationFinished) {
-        currentHeart++;
-        currentHeart %= 4;
+    heartStr[0] = currentHeart + 1;
 
-        heartStr[0] = currentHeart + 1;
+    setIntensity(matrix);
 
-        setIntensity(matrix);
-        matrix->displayReset(getIdZone());
-    }
+    matrix->displayZoneText(getIdZone(), heartStr, PA_LEFT, 0, HEART_PULSE_MS, PA_PRINT, PA_NO_EFFECT);
 }
 
 void AppletHeart::printSerial() {
@@ -29,11 +28,7 @@ void AppletHeart::printSerial() {
 
 void AppletHeart::onResume(MD_Parola *matrix) {
     Applet::onResume(matrix);
-
     matrix->setFont(getIdZone(), hearts);
-    setIntensity(matrix);
-
-    matrix->displayZoneText(getIdZone(), heartStr, PA_LEFT, 0, HEART_PULSE_MS, PA_PRINT, PA_NO_EFFECT);
 }
 
 void AppletHeart::setIntensity(MD_Parola *matrix) {

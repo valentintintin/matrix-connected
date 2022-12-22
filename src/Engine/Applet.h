@@ -19,7 +19,7 @@ class Applet {
 public:
     static long APPLET_ID;
 
-    Applet(Orchestror *orchestror, const char* name, const byte type, const byte priority = 0);
+    Applet(Orchestror *orchestror, const char* name, byte type, byte priority = 0);
 
     virtual void onInit(MD_Parola *matrix);
     virtual void onPause();
@@ -30,9 +30,9 @@ public:
         return displayed;
     }
 
-    const byte getIdZone() const;
+    byte getIdZone() const;
 
-    inline const long getId() const {
+    inline long getId() const {
         return id;
     }
 
@@ -44,24 +44,24 @@ public:
         return name;
     }
 
-    inline const byte getType() const {
+    inline byte getType() const {
         return type;
     }
 
-    inline const uint16_t getStartColumn() const {
+    inline uint16_t getStartColumn() const {
         return startColumn;
     }
 
-    inline const uint16_t getEndColumn() const {
+    inline uint16_t getEndColumn() const {
         return endColumn;
     }
 
     virtual void refresh();
     virtual void printSerial();
 
-    virtual bool shouldBePaused(bool isAnimationFinished) = 0;
-    virtual bool shouldBeDestroyed(bool isAnimationFinished) = 0;
-    virtual void draw(MD_Parola *matrix, bool isAnimationFinished) = 0;
+    virtual bool shouldBeResumed() = 0;
+    virtual bool shouldBeDestroyed() = 0;
+    virtual void draw(MD_Parola *matrix) = 0;
 
 protected:
     Orchestror* orchestror;

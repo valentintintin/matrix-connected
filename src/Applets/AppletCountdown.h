@@ -13,18 +13,18 @@ public:
 
     void stopTimer(bool forced = false);
 
-    bool shouldBePaused(bool isAnimationFinished) override;
-    bool shouldBeDestroyed(bool isAnimationFinished) override;
+    bool shouldBeResumed() override;
+    bool shouldBeDestroyed() override;
     void refresh() override;
-    void draw(MD_Parola *matrix, bool isAnimationFinished) override;
+    void draw(MD_Parola *matrix) override;
     void printSerial() override;
 
 private:
     bool running, songAtTheEnd;
-    uint64_t millisToCount, initTime, lastTime;
-    char timeStr[16];
-    char name[MAX_LENGTH_MESSAGE];
-    char buffer[MAX_LENGTH_MESSAGE + 16];
+    uint64_t millisToCount, initTime, lastTime{};
+    char timeStr[16]{};
+    char name[MAX_LENGTH_MESSAGE]{};
+    char buffer[MAX_LENGTH_MESSAGE + 16]{};
 };
 
 #endif

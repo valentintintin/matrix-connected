@@ -23,8 +23,6 @@ void Applet::onResume(MD_Parola *matrix) {
 
     displayed = true;
     refresh();
-
-    matrix->displayClear(getIdZone());
 }
 
 void Applet::onDestroy() {
@@ -38,6 +36,6 @@ void Applet::printSerial() {
     DPRINT(F("[APPLET]")); DPRINT(getName()); DPRINT(F("(")); DPRINT(orchestror->getIdZone()); DPRINT(F(")")); DPRINT(F(", Zone: ")); DPRINT(getIdZone()); DPRINT(F(", Displayed: ")); DPRINTLN(isDisplayed());
 }
 
-const byte Applet::getIdZone() const {
+byte Applet::getIdZone() const {
     return orchestror->getIdZone();
 }
