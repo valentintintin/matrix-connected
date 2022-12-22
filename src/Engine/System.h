@@ -30,6 +30,7 @@ public:
     explicit System(MD_Parola *matrix, bool enableDong = false, byte soundPin = 255, byte ledPin = 255);
 
     void setMatrixActivated(bool activated);
+    void setMatrixIntensity(byte intensity);
     void update();
 
     void setSongToPlay(const char *song);
@@ -46,6 +47,10 @@ public:
 
     inline bool isMatrixActivated() const {
         return matrixActivated;
+    }
+
+    inline byte getMatrixIntensity() const {
+        return matrixIntensity;
     }
 
     inline MD_Parola* getMatrix() {
@@ -67,6 +72,8 @@ private:
     byte ledPin;
     Ticker* blinkTicker;
     byte blinkCounter;
+
+    byte matrixIntensity;
 
     Orchestror* orchestrors[NB_MAX_ORCHESTROR];
 

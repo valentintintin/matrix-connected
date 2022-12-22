@@ -37,7 +37,6 @@ private:
     const byte idZone;
     byte nbApplets = 0;
     Applet* currentApplet = nullptr;
-    Applet* lastApplet = nullptr;
     Applet* applets[NB_MAX_APPLETS];
     System* system;
 };

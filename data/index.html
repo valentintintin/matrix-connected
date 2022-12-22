@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contrôle horloge</title>
+
+  <!-- Pico.css (Classless version) -->
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.classless.min.css">
+</head>
+
+<body>
+
+<!-- Header -->
+<header>
+  <hgroup>
+    <h1>Contrôle horloge</h1>
+  </hgroup>
+  <nav>
+    <ul>
+      <li>
+        <a href="#system">Système</a>
+      </li>
+      <li>
+        <a href="#message">Message</a>
+      </li>
+      <li>
+        <a href="#countdown">Compte à rebours</a>
+      </li>
+    </ul>
+  </nav>
+</header><!-- ./ Header -->
+
+<!-- Main -->
+<main>
+
+  <!-- Form elements-->
+  <section id="system">
+    <form>
+      <h2>Système</h2>
+
+      <fieldset>
+        <legend>État</legend>
+        <button id="stateOn">Allumer</button>
+        <button id="stateOff">Éteindre</button>
+      </fieldset>
+
+      <!-- Range slider control -->
+      <label for="intensity">Intensité
+        <input type="range" min="0" max="15" value="0" id="intensity">
+      </label>
+    </form>
+  </section><!-- ./ Form elements-->
+
+  <!-- Preview -->
+  <section id="message">
+    <h2>Message</h2>
+    <form>
+      <input type="text" id="messageText" placeholder="Texte du message" required>
+      <button type="submit" id="sendMessage">Envoyer</button>
+    </form>
+  </section><!-- ./ Preview -->
+
+  <!-- Form elements-->
+  <section id="countdown">
+    <form>
+      <h2>Compte à rebours</h2>
+
+      <label for="duration">Date et heure
+        <input type="datetime-local" id="duration">
+      </label>
+
+      <!-- Buttons -->
+      <input type="button" value="Lancer" id="startCoutdown" />
+      <input type="reset" value="Arrêter" id="stopCountdown" />
+
+    </form>
+  </section><!-- ./ Form elements-->
+
+</main><!-- ./ Main -->
+
+<script src="https://www.riccardodegni.com/projects/dommy/serve.php?js=dommy-min"></script>
+
+<script>
+  $$$(function() {
+    $('stateOn').on('click', function (event) {
+      event.preventDefault();
+
+      this.ajax('/state?state=on', function(data) {
+      }, function(error) {
+        console.error(error);
+      });
+    });
+
+    $('stateOff').on('click', function (event) {
+      event.preventDefault();
+
+      this.ajax('/state?state=off', function(data) {
+      }, function(error) {
+        console.error(error);
+      });
+    });
+
+    $('intensity').on('click', function () {
+      this.ajax('/intensity?val=' + this.value, function(data) {
+      }, function(error) {
+        console.error(error);
+      });
+    });
+
+    $('sendMessage').on('click', function (event) {
+      event.preventDefault();
+      const messageText = $('messageText');
+
+      this.ajax('/message/add?msg=' + messageText.value, function(data) {
+        messageText.value = '';
+      }, function(error) {
+        console.error(error);
+      });
+    });
+
+    $('startCoutdown').on('click', function (event) {
+      event.preventDefault();
+      const durationEl = $('duration');
+      const duration = ((new Date(durationEl.value).getTime()) - (new Date().getTime())) / 1000;
+
+      this.ajax('/countdown/start?restart=1&duration=' + duration, function(data) {
+        durationEl.value = '';
+      }, function(error) {
+        console.error(error);
+      });
+    });
+
+    $('stopCountdown').on('click', function (event) {
+      event.preventDefault();
+
+      this.ajax('/countdown/stop', function(data) {
+      }, function(error) {
+        console.error(error);
+      });
+    });
+  });
+</script>
+</body>
+</html>
+

@@ -23,7 +23,7 @@ System::System(MD_Parola *matrix, bool enableDong, byte soundPin, byte ledPin) :
 
     matrix->begin(NB_MAX_ORCHESTROR);
     matrix->setZone(ZONE, 0, 7);
-    matrix->setIntensity(1);
+    setMatrixIntensity(1);
     matrix->setFont(font);
     setMatrixActivated(true);
 
@@ -44,6 +44,11 @@ void System::setMatrixActivated(bool activated) {
     if (!activated && rtttl::isPlaying()) {
         rtttl::stop();
     }
+}
+
+void System::setMatrixIntensity(byte intensity) {
+    matrix->setIntensity(matrixIntensity);
+    matrixIntensity = intensity;
 }
 
 void System::update() {

@@ -5,6 +5,8 @@
 #include <ESPAsyncWebServer.h>
 #include <DNSServer.h>
 #include <MD_Parola.h>
+#include <AsyncElegantOTA.h>
+#include <NtpClientLib.h>
 
 #include "Orchestror.h"
 

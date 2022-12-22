@@ -35,7 +35,7 @@ void Orchestror::update() {
                     && (newApplet == nullptr || applet->getPriority() >= newApplet->getPriority())
                         ) {
                     newApplet = applet;
-                    DPRINT(F("\tApplet max priority: ")); DPRINTLN(newApplet->getName());
+                    DPRINT(F("\tNew applet: ")); DPRINTLN(newApplet->getName());
                 }
             }
         }
@@ -84,7 +84,7 @@ void Orchestror::addApplet(Applet* applet) {
 void Orchestror::resumeApplet(Applet* applet) {
     DPRINTLN(F("[ORCHESTROR]Resume applet")); DPRINT(F("\t"));
 
-    if (applet != lastApplet) {
+    if (applet != currentApplet) {
         if (currentApplet != nullptr) {
             pauseApplet(currentApplet);
         }
@@ -100,7 +100,6 @@ void Orchestror::pauseApplet(Applet* applet, bool displayNext) {
 
     applet->onPause();
 
-    lastApplet = applet;
     currentApplet = nullptr;
 }
 

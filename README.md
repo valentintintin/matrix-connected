@@ -19,7 +19,7 @@ Every parameters are in query string.
 
 - /message/add?msg=XX
 - /countdown/stop and /countdown/start?duration=XX (seconds) or /countdown/start?day=XX&hour=XX&minute=XX&second=XX with optionals: noSongAtTheEnd=1 or name=XXX 
-- /intensity?val=[0-15]
+- /matrixIntensity?val=[0-15]
 - /notify/(song|dong|alert)
 - /state?state=(on|off) `enable of disable the system`
 - /ram `Get the head free space`

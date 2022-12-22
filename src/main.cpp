@@ -3,7 +3,6 @@
 #include <ESPAsyncWiFiManager.h>
 #include <MD_Parola.h>
 #include <MD_MAX72xx.h>
-#include <SPI.h>
 
 #include "Engine/WebServer.h"
 #include "Engine/System.h"
