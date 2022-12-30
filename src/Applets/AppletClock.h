@@ -6,7 +6,7 @@
 class AppletClock : public Applet {
 
 public:
-    explicit AppletClock(Orchestror *orchestror);
+    explicit AppletClock(Orchestror *orchestror, bool withSecond = true);
 
     void refresh() override;
     bool shouldBeResumed() override;
@@ -16,6 +16,7 @@ public:
 
 private:
     char timeStr[10]{};
+    bool withSecond;
 };
 
 #endif

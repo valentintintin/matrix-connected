@@ -12,9 +12,10 @@
 #define CS_PIN D8
 #define LED_PIN 255
 #define SOUND_PIN 255
-#define AP_SSID "Horloge Willyam"
+#define NUM_DEVICES 8
 
-System systemEngine(new MD_Parola(MD_MAX72XX::ICSTATION_HW, CS_PIN, 8), false, SOUND_PIN, LED_PIN);
+System systemEngine(new MD_Parola(MD_MAX72XX::ICSTATION_HW, CS_PIN, NUM_DEVICES), NUM_DEVICES, true, SOUND_PIN, LED_PIN);
+//System systemEngine(new MD_Parola(MD_MAX72XX::FC16_HW, CS_PIN, NUM_DEVICES), NUM_DEVICES, true, SOUND_PIN, LED_PIN, ZONE);
 
 WebServer webServer(&systemEngine);
 
@@ -41,16 +42,16 @@ void setup() {
     //wifiManager.setAPCallback(configModeCallback);
     wifiManager.autoConnect(AP_SSID);
 
+    Serial.println(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
+
     DPRINTLN(F("[NTP]Start"));
     NTP.begin();
     NTP.setTimeZone(1);
     NTP.setDayLight(true);
 
-    webServer.begin();
+    systemEngine.addMessage((String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString()).c_str());
 
-    Orchestror* orchestror = systemEngine.getOrchestorForZone(ZONE);
-    orchestror->getSystem()->addMessage(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
-    DPRINTLN(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
+    webServer.begin();
 
     digitalWrite(LED_BUILTIN, HIGH);
     systemEngine.setLed(LOW);
@@ -61,6 +62,4 @@ void setup() {
 
 void loop() {
     systemEngine.update();
-
-//    Serial.print(F("Heap: ")); Serial.println(ESP.getFreeHeap());
 }

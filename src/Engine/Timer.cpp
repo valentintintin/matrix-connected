@@ -9,8 +9,16 @@ Timer::Timer(unsigned long interval, bool hasExpired) : interval(interval) {
     }
 }
 
-bool Timer::hasExpired() {
+bool Timer::hasExpired() const {
     return trigger || millis() - timeLast >= interval;
+}
+
+void Timer::setInterval(unsigned long newInterval, bool shouldRestart) {
+    interval = newInterval;
+
+    if (shouldRestart) {
+        restart();
+    }
 }
 
 void Timer::restart() {
@@ -23,7 +31,7 @@ void Timer::setExpired() {
     trigger = true;
 }
 
-unsigned long Timer::getTimeLeft() {
+unsigned long Timer::getTimeLeft() const {
     return hasExpired() ? 0 : timeLast + interval - millis();
 }
 

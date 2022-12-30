@@ -5,3 +5,4 @@ main
 CMakeList*
 .idea
 cmake-build-nodemcu
+platformio.mine.ini

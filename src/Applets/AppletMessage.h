@@ -13,13 +13,11 @@ class AppletMessage : public Applet {
 public:
     explicit AppletMessage(Orchestror *orchestror);
 
-    void onResume(MD_Parola *matrix) override;
     bool shouldBeResumed() override;
     bool shouldBeDestroyed() override;
     void draw(MD_Parola *matrix) override;
     void printSerial() override;
 
-    void addMessage(const String& messageToAdd);
     void addMessage(const char* messageToAdd);
 
 private:

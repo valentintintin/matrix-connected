@@ -1,148 +1,184 @@
+#include <LittleFS.h>
 #include "Applets/AppletCountdown.h"
 #include "WebServer.h"
+#include "Applets/AppletMessageLoop.h"
 
 WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(SPIFFS, "/index.html");
+    const String& json = F("application/json");
+    const String& trueJson = F("true");
+    const String& falseJson = F("false");
+    const __FlashStringHelper* durationArg = F("duration");
+    const __FlashStringHelper* restartArg = F("restart");
+    const __FlashStringHelper* valArg = F("val");
+    const __FlashStringHelper* msgArg = F("msg");
+
+    server.on(PSTR("/"), HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(LittleFS, F("/index.html"));
     });
 
-    server.on("/message/add", HTTP_GET, [system](AsyncWebServerRequest *request) {
+    server.on(PSTR("/message/add"), HTTP_GET, [msgArg, restartArg, json, trueJson, falseJson, system, durationArg](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/message/add\t"));
 
-        if (request->hasArg("msg") && request->arg("msg").length() > 0) {
-            String msg = request->arg("msg");
+        if (request->hasArg(msgArg) && request->arg(msgArg).length() > 0) {
+            String msg = request->arg(msgArg);
             DPRINT(F("Msg: ")); DPRINTLN(msg);
 
-            if (system->addMessage(msg)) {
-                request->send(201, F("application/json"), F("true"));
+            unsigned long duration = 0;
+            if (request->hasArg(durationArg)) {
+                duration = (unsigned long) request->arg(durationArg).toInt();
+                DPRINT(F("Duration: ")); DPRINTLN((unsigned long) duration);
+            }
+
+            if (duration > 0) {
+                Orchestror* orchestror = system->getMainOrchestor();
+                Applet* applet = orchestror->getAppletByType(MESSAGE_LOOP);
+                if (applet != nullptr) {
+                    if (request->hasArg(restartArg)) {
+                        ((AppletMessageLoop *) applet)->stopTimer();
+                    } else {
+                        request->send(403, json, F("\"There is already a message loop. Stop it before add a new one\""));
+                        return;
+                    }
+                }
+
+                bool result = orchestror->addApplet(
+                    new AppletMessageLoop(orchestror, request->arg(msgArg).c_str(), duration)
+                );
+                request->send(result ? 201 : 500, json, result ? trueJson : falseJson);
             } else {
-                request->send(500, F("text/plain"), F("Impossible to get applet"));
-                return;
+                if (system->addMessage(msg.c_str())) {
+                    request->send(201, json, trueJson);
+                } else {
+                    request->send(500, json, F("\"Impossible to get applet\""));
+                }
             }
         } else {
             DPRINTLN("Missing msd parameter");
-            request->send(400, F("text/plain"), F("Missing msg parameter in query"));
+            request->send(400, json, F("\"Missing msg parameter in query\""));
         }
     });
 
-    server.on("/countdown/start", HTTP_GET, [system](AsyncWebServerRequest *request) {
-        Orchestror* orchestror = system->getOrchestorForZone(ZONE);
+    server.on(PSTR("/message/loop/stop"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {
+        Orchestror* orchestror = system->getMainOrchestor();
+        Applet* applet = orchestror->getAppletByType(MESSAGE_LOOP);
+        if (applet == nullptr) {
+            request->send(500, json, F("\"Impossible to get applet\""));
+            return;
+        }
+
+        ((AppletMessageLoop*) applet)->stopTimer();
+        request->send(200, json, trueJson);
+    });
+
+    server.on(PSTR("/countdown/start"), HTTP_GET, [msgArg, restartArg, json, trueJson, system, durationArg](AsyncWebServerRequest *request) {
+        Orchestror* orchestror = system->getMainOrchestor();
         Applet* applet = orchestror->getAppletByType(COUNTDOWN);
         if (applet != nullptr) {
-            if (request->hasArg(F("restart"))) {
+            if (request->hasArg(restartArg)) {
                 ((AppletCountdown *) applet)->stopTimer(true);
             } else {
-                request->send(403, F("text/plain"), F("There is already a countdown. Stop it before add a new one"));
+                request->send(403, json, F("\"There is already a countdown. Stop it before add a new one\""));
                 return;
             }
         }
 
         bool songAtTheEnd = !request->hasArg(F("noSongAtTheEnd"));
 
-        if (request->hasArg(F("duration"))) {
-            orchestror->addApplet(new AppletCountdown(orchestror, (uint64_t) request->arg(F("duration")).toInt(), request->arg(F("name")), songAtTheEnd));
-            request->send(201, F("application/json"), F("true"));
+        if (request->hasArg(durationArg)) {
+            orchestror->addApplet(new AppletCountdown(orchestror, (unsigned long) request->arg(durationArg).toInt(), request->arg(msgArg), songAtTheEnd));
+            request->send(201, json, trueJson);
         } else {
-            uint64_t toDate = request->hasArg(F("day")) ? request->arg(F("day")).toInt() * 86400 : 0;
-            toDate += request->hasArg(F("hour")) ? request->arg(F("hour")).toInt() * 3600 : 0;
-            toDate += request->hasArg(F("minute")) ? request->arg(F("minute")).toInt() * 60 : 0;
-            toDate += request->hasArg(F("second")) ? request->arg(F("second")).toInt() : 0;
-            if (toDate > 0) {
-                orchestror->addApplet(new AppletCountdown(orchestror, toDate, request->arg(F("name")), songAtTheEnd));
-                request->send(201, F("application/json"), F("true"));
-            } else {
-                request->send(400, F("text/plain"), F("Missing duration or day/hour/minute/second/duration(sec) or name(optional) parameter in query"));
-            }
+            request->send(400, json, F("\"Missing duration(sec) or msg(optional) parameter in query\""));
         }
     });
 
-    server.on("/countdown/stop", HTTP_GET, [system](AsyncWebServerRequest *request) {
-        Orchestror* orchestror = system->getOrchestorForZone(ZONE);
+    server.on(PSTR("/countdown/stop"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {
+        Orchestror* orchestror = system->getMainOrchestor();
         Applet* applet = orchestror->getAppletByType(COUNTDOWN);
         if (applet == nullptr) {
-            request->send(500, F("text/plain"), F("Impossible to get applet"));
+            request->send(500, json, F("\"Impossible to get applet\""));
             return;
         }
 
         ((AppletCountdown*) applet)->stopTimer(true);
-        request->send(200, F("application/json"), F("true"));
+        request->send(200, json, trueJson);
     });
 
-    server.on("/state", HTTP_GET, [system](AsyncWebServerRequest *request) {
+    server.on(PSTR("/state"), HTTP_GET, [valArg, system, json, trueJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/matrixActivated\t"));
-        if (request->hasArg(F("state"))) {
-            bool state = request->arg(F("state")).equalsIgnoreCase(F("on"));
+        if (request->hasArg(valArg)) {
+            bool state = request->arg(valArg).equalsIgnoreCase(trueJson);
             DPRINT(F("State: ")); DPRINTLN(state);
             system->setMatrixActivated(state);
-            request->send(200, F("application/json"), F("true"));
+            request->send(200, json, trueJson);
         } else {
             DPRINTLN("Missing duration parameter");
-            request->send(400, F("text/plain"), F("Missing state parameter in query (on|off)"));
+            request->send(400, json, F("\"Missing val parameter in query (true|false)\""));
         }
     });
 
-    server.on("/ram", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on(PSTR("/ping"), HTTP_GET, [json, trueJson, falseJson, system](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/ping"));
+        system->shouldPingPixelServer();
+        request->send(200, json, trueJson);
+    });
+
+    server.on(PSTR("/ram"), HTTP_GET, [json](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/ram"));
-        request->send(200, F("text/plain"), String(ESP.getFreeHeap()));
+        request->send(200, json, String(ESP.getFreeHeap()));
     });
 
-    server.on("/ram2", HTTP_GET, [](AsyncWebServerRequest *request) {
-        DPRINTLN(F("[WEB SERVER]/ram2"));
-        request->send(200, F("text/plain"), String(ESP.getHeapFragmentation()));
-    });
-
-    server.on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request) {
+    server.on(PSTR("/uptime"), HTTP_GET, [json](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/uptime"));
-        request->send(200, F("text/plain"), NTP.getUptimeString());
+        request->send(200, json, String(NTP.getUptime()));
     });
 
-    server.on("/notify/dong", HTTP_GET, [system](AsyncWebServerRequest *request) {
+    server.on(PSTR("/notify/dong"), HTTP_GET, [system, json, trueJson, falseJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/dong\t"));
-        system->dong();
-        request->send(200, F("application/json"), F("true"));
+        bool result = system->dong();
+        request->send(result ? 200 : 500, json, result ? trueJson : falseJson);
     });
 
-    server.on("/notify/song", HTTP_GET, [system](AsyncWebServerRequest *request) {
+    server.on(PSTR("/notify/song"), HTTP_GET, [system, json, trueJson, falseJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/song\t"));
-        system->notify();
-        request->send(200, F("application/json"), F("true"));
+        bool result = system->notify();
+        request->send(result ? 200 : 500, json, result ? trueJson : falseJson);
     });
 
-    server.on("/notify/alert", HTTP_GET, [system](AsyncWebServerRequest *request) {
+    server.on(PSTR("/notify/alert"), HTTP_GET, [system, json, trueJson, falseJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/alert\t"));
-        system->alert();
-        request->send(200, F("application/json"), F("true"));
+        bool result = system->alert();
+        request->send(result ? 200 : 500, json, result ? trueJson : falseJson);
     });
 
-    server.on("/message/date", HTTP_GET, [system](AsyncWebServerRequest *request) {
+    server.on(PSTR("/message/date"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/message/date\t"));
         system->showDateMessage();
-        request->send(200, F("application/json"), F("true"));
+        request->send(200, json, trueJson);
     });
 
-    server.on("/intensity", HTTP_GET, [system](AsyncWebServerRequest *request) {
+    server.on(PSTR("/intensity"), HTTP_GET, [valArg, system, json, trueJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/intensity\t"));
-        if (request->hasArg(F("val"))) {
-            byte val = (byte) request->arg(F("val")).toInt();
+        if (request->hasArg(valArg)) {
+            byte val = (byte) request->arg(valArg).toInt();
             DPRINT(F("Val: ")); DPRINTLN(val);
             system->setMatrixIntensity(val);
-            request->send(201, F("application/json"), F("true"));
+            request->send(201, json, trueJson);
         } else {
             DPRINTLN("Missing val parameter");
-            request->send(400, F("text/plain"), F("Missing val parameter in query"));
+            request->send(400, json, F("\"Missing val parameter in query\""));
         }
-        request->send(201, F("application/json"), F("true"));
     });
 
-    server.onNotFound([](AsyncWebServerRequest *request) {
+    server.onNotFound([json](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]Not found\t"));
-        request->send(404, F("text/plain"), F("Not found"));
+        request->send(404, json, F("\"Not found\""));
     });
 }
 
 void WebServer::begin() {
     DPRINTLN(F("[WEB SERVER]Start"));
-    SPIFFS.begin();
+    LittleFS.begin();
     AsyncElegantOTA.begin(&server);
     server.begin();
 }

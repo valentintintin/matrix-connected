@@ -1,8 +1,8 @@
 #include "AppletCountdown.h"
 
-AppletCountdown::AppletCountdown(Orchestror *orchestror, uint64_t secondToCount, String name, bool songAtTheEnd)
-: Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10),
-running(true), songAtTheEnd(songAtTheEnd), millisToCount(secondToCount * 1000), initTime(millis()) {
+AppletCountdown::AppletCountdown(Orchestror *orchestror, unsigned long secondToCount, String name, bool songAtTheEnd)
+    : Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10),
+    songAtTheEnd(songAtTheEnd), timer(secondToCount * 1000) {
     utf8ascii(name).toCharArray(this->name, name.length() + 1);
 
     if (!orchestror->getSystem()->addMessage(this->name)) {
@@ -13,32 +13,26 @@ running(true), songAtTheEnd(songAtTheEnd), millisToCount(secondToCount * 1000), 
 }
 
 bool AppletCountdown::shouldBeResumed() {
-    return running;
+    return !timer.hasExpired();
 }
 
 bool AppletCountdown::shouldBeDestroyed() {
-    return !running;
+    return timer.hasExpired();
 }
 
 void AppletCountdown::refresh() {
     Applet::refresh();
 
-    if (running) {
-        lastTime = millis();
+    if (!timer.hasExpired()) {
+        unsigned long deltaMillis = timer.getTimeLeft();
 
-        uint64_t deltaMillis = lastTime - initTime;
+        millisToString(deltaMillis, timeStr);
 
-        if (deltaMillis < millisToCount) {
-            deltaMillis = millisToCount - deltaMillis;
-
-            millisToString(deltaMillis, timeStr);
-
-            if (strlen(name) > 1 && deltaMillis % MESSAGE_RECALL_MS_SECOND == 0) {
-                orchestror->getSystem()->addMessage(name);
-            }
-        } else {
-            stopTimer();
+        if (strlen(name) > 1 && deltaMillis % MESSAGE_RECALL_MS_SECOND == 0) {
+            orchestror->getSystem()->addMessage(name);
         }
+    } else {
+        stopTimer();
     }
 }
 
@@ -51,8 +45,6 @@ void AppletCountdown::printSerial() {
 }
 
 void AppletCountdown::stopTimer(bool forced) {
-    running = false;
-
     if (!forced) {
         if (strlen(name) > 1) {
             buffer[0] = '\0';

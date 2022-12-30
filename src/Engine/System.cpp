@@ -4,13 +4,15 @@
 #include "System.h"
 #include "FontData.h"
 
-#include "Applets/AppletHeart.h"
-#include "Applets/AppletScreenSaver.h"
 #include "Applets/AppletMessage.h"
 #include "Applets/AppletClock.h"
 
-System::System(MD_Parola *matrix, bool enableDong, byte soundPin, byte ledPin) :
-    matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false), ledPin(ledPin), blinkTicker(new Ticker()) {
+System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPin, byte ledPin, byte mainZone) :
+    matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false),
+    mainZone(mainZone), ledPin(ledPin), blinkTicker(new Ticker()),
+    numDevices(numDevices), timerPingPixelServer(INTERVAL_PING_PIXEL_SERVER, true) {
+    wifiClient.setInsecure();
+
     DPRINTLN(F("[MATRIX]Start"));
 
     if (soundPin != 255) {
@@ -30,7 +32,7 @@ System::System(MD_Parola *matrix, bool enableDong, byte soundPin, byte ledPin) :
     orchestrors[ZONE] = new Orchestror(this, (byte) ZONE);
 
     DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
-    orchestrors[ZONE]->addApplet(new AppletClock(orchestrors[ZONE]));
+    orchestrors[ZONE]->addApplet(new AppletClock(orchestrors[ZONE], numDevices > 4));
     orchestrors[ZONE]->addApplet(new AppletMessage(orchestrors[ZONE]));
 }
 
@@ -76,32 +78,54 @@ void System::update() {
             rtttl::play();
         }
     } else {
-        // fake delay for CPU stress
+        // fake delay for avoid CPU stress
         delay(matrix->getSpeed());
     }
+
+    if (timerPingPixelServer.hasExpired()) {
+        pingPixelServer();
+        timerPingPixelServer.restart();
+    }
+
+#ifdef DEBUG
+    delay(75);
+    Serial.print(F("Heap: ")); Serial.println(ESP.getFreeHeap());
+#endif
 }
 
-void System::setSongToPlay(const char *song) {
+bool System::setSongToPlay(const char *song) {
     if (soundPin != 255 && rtttl::done()) {
         strcpy_P(bufferSong, song);
         rtttl::begin(soundPin, bufferSong);
+
+        return true;
     }
+
+    return false;
 }
 
-void System::setLed(bool status) const {
+bool System::setLed(bool status) const {
     if (ledPin != 255) {
         digitalWrite(ledPin, status);
+
+        return true;
     }
+
+    return false;
 }
 
-void System::setBlink() {
+bool System::setBlink() {
     if (ledPin != 255) {
         setLed(LOW);
         blinkCounter = 0;
         blinkTicker->attach_ms(300, [this] {
             this->blinkProcess();
         });
+
+        return true;
     }
+
+    return false;
 }
 
 void System::blinkProcess() {
@@ -119,22 +143,8 @@ void System::blinkProcess() {
     }
 }
 
-bool System::addMessage(const String& messageToAdd) {
-    Orchestror* orchestror = getOrchestorForZone(ZONE);
-    Applet* applet = orchestror->getAppletByType(MESSAGE);
-
-    if (applet == nullptr) {
-        return false;
-    }
-
-    ((AppletMessage*) applet)->addMessage(messageToAdd);
-
-    return true;
-}
-
 bool System::addMessage(const char* messageToAdd) {
-    Orchestror* orchestror = getOrchestorForZone(ZONE);
-    Applet* applet = orchestror->getAppletByType(MESSAGE);
+    Applet* applet = getAppletByTypeOnAnyOrchestor(MESSAGE);
 
     if (applet == nullptr) {
         return false;
@@ -145,28 +155,74 @@ bool System::addMessage(const char* messageToAdd) {
     return true;
 }
 
-void System::notify() {
+bool System::notify() {
     DPRINTLN(F("[SYSTEM]Notify"));
-    setSongToPlay(dangoSong);
     setBlink();
+    return setSongToPlay(dangoSong);
 }
 
-void System::dong() {
+bool System::dong() {
     DPRINTLN(F("[SYSTEM]Dong"));
-    setSongToPlay(dongSong);
     setBlink();
+    return setSongToPlay(dongSong);
 }
 
-void System::alert() {
+bool System::alert() {
     DPRINTLN(F("[SYSTEM]Alert"));
-    setSongToPlay(alertSong);
     setBlink();
+    return setSongToPlay(alertSong);
 }
 
-void System::showDateMessage() {
+bool System::showDateMessage() {
     time_t moment = now();
+
     dayStr[0] = '\0';
     strcpy_P(dayStr, (char*) pgm_read_dword(&(weekDays[weekday(moment) - 1])));
     sprintf_P(dateStr, PSTR("On est le %s %02d/%02d/%4d"), dayStr, day(moment), month(moment), year(moment));
-    addMessage(dateStr);
+
+    return addMessage(dateStr);
+}
+
+bool System::pingPixelServer() {
+    DPRINTLN(F("[System]pingPixelServer"));
+
+    http.begin(wifiClient, F("http://pixel-server.ovh/esp_clock/index.php"));
+    http.addHeader(F("Content-Type"), F("application/x-www-form-urlencoded"));
+
+    rst_info *resetInfo = ESP.getResetInfoPtr();
+    sprintf_P(pingPixelServerPayload, PSTR("name=%s&uptime=%ld&restartReason=%d"), F(AP_SSID), NTP.getUptime(), resetInfo->reason);
+
+    DPRINT(F("[System]pingPixelServer payload: ")); DPRINTLN(pingPixelServerPayload);
+
+    int successCode = http.POST(pingPixelServerPayload);
+
+    if (successCode <= 0) {
+        DPRINT(F("[System]pingPixelServer: Error code ")); DPRINTLN(http.errorToString(successCode));
+    } else {
+        DPRINT(F("[System]pingPixelServer: ")); DPRINTLN(http.getString());
+    }
+
+    http.end();
+
+    delay(5000);
+
+    return successCode > 0;
+}
+
+void System::shouldPingPixelServer() {
+    timerPingPixelServer.setExpired();
+}
+
+Applet *System::getAppletByTypeOnAnyOrchestor(int appletType) {
+    for (auto orchestror : orchestrors) {
+        for (byte i = 0; i < NB_MAX_APPLETS; i++) {
+            Applet *applet = orchestror->getAppletByType(appletType);
+
+            if (applet != nullptr) {
+                return applet;
+            }
+        }
+    }
+
+    return nullptr;
 }

@@ -9,7 +9,7 @@
 class AppletCountdown : public Applet {
 
 public:
-    AppletCountdown(Orchestror *orchestror, uint64_t secondToCount, String name = "", bool songAtTheEnd = true);
+    AppletCountdown(Orchestror *orchestror, unsigned long secondToCount, String name = "", bool songAtTheEnd = true);
 
     void stopTimer(bool forced = false);
 
@@ -20,8 +20,8 @@ public:
     void printSerial() override;
 
 private:
-    bool running, songAtTheEnd;
-    uint64_t millisToCount, initTime, lastTime{};
+    bool songAtTheEnd;
+    Timer timer;
     char timeStr[16]{};
     char name[MAX_LENGTH_MESSAGE]{};
     char buffer[MAX_LENGTH_MESSAGE + 16]{};

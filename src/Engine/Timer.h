@@ -8,9 +8,9 @@ public:
 
     void restart();
     void setExpired();
-    bool hasExpired();
-
-    unsigned long getTimeLeft();
+    bool hasExpired() const;
+    void setInterval(unsigned long newInterval, bool shouldRestart = true);
+    unsigned long getTimeLeft() const;
 
 private:
     unsigned long interval;

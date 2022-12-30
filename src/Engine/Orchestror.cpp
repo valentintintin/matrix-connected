@@ -53,13 +53,13 @@ void Orchestror::update() {
     matrix->synchZoneStart();
 }
 
-void Orchestror::addApplet(Applet* applet) {
+bool Orchestror::addApplet(Applet* applet) {
     DPRINTLN(F("[ORCHESTROR]Add applet"));
 
     if (nbApplets >= NB_MAX_APPLETS) {
         DPRINTLN(F("\tKO (too much)"));
 
-        return;
+        return false;
     }
 
     DPRINT(F("\t"));
@@ -79,6 +79,8 @@ void Orchestror::addApplet(Applet* applet) {
             break; // Nothing more to do
         }
     }
+
+    return true;
 }
 
 void Orchestror::resumeApplet(Applet* applet) {

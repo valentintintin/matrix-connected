@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define AP_SSID "Horloge Willyam"
+
 #include <Arduino.h>
 
 //#define DEBUG

@@ -26,10 +26,6 @@ void AppletMessage::printSerial() {
     Applet::printSerial(); DPRINT(F("\tMessage: ")); DPRINT(message); DPRINT(F(", Nb message: ")); DPRINT(messages.count()); DPRINT(F(", Has messages: ")); DPRINTLN(hasMessage);
 }
 
-void AppletMessage::addMessage(const String& messageToAdd) {
-    addMessage(messageToAdd.c_str());
-}
-
 void AppletMessage::addMessage(const char* messageToAdd) {
     Applet::printSerial(); DPRINT(F("\tAddMessage: ")); DPRINT(messageToAdd); DPRINT(F(", Nb message: ")); DPRINT(messages.count()); DPRINT(F(", Has messages: ")); DPRINTLN(hasMessage);
 
@@ -51,9 +47,4 @@ void AppletMessage::popMessage() {
     strcpy(this->message, newMessage);
 
     delete newMessage;
-}
-
-void AppletMessage::onResume(MD_Parola *matrix) {
-    Applet::onResume(matrix);
-//    matrix->setTextBuffer(getIdZone(), "");
 }

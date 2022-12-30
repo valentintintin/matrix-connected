@@ -18,7 +18,7 @@ public:
 
     void update();
 
-    void addApplet(Applet* applet);
+    bool addApplet(Applet* applet);
     void pauseApplet(Applet* applet, bool displayNext = true);
     void resumeApplet(Applet* applet);
     void destroyApplet(byte iApplet);

@@ -13,6 +13,7 @@ class Orchestror;
 #define MESSAGE 2
 #define SCREEN_SAVER 3
 #define COUNTDOWN 4
+#define MESSAGE_LOOP 5
 
 class Applet {
 

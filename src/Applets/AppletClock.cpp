@@ -2,7 +2,8 @@
 
 #include <NtpClientLib.h>
 
-AppletClock::AppletClock(Orchestror *orchestror) : Applet(orchestror, PSTR("Clock"), CLOCK, 10) {
+AppletClock::AppletClock(Orchestror *orchestror, bool withSecond) :
+    Applet(orchestror, PSTR("Clock"), CLOCK, 10), withSecond(withSecond) {
 }
 
 bool AppletClock::shouldBeResumed() {
@@ -14,7 +15,14 @@ bool AppletClock::shouldBeDestroyed() {
 }
 
 void AppletClock::refresh() {
-    NTP.getTimeStr().toCharArray(timeStr, 10);
+    Applet::refresh();
+
+    NTP.getTimeStr().toCharArray(timeStr, sizeof(timeStr));
+
+    if (!withSecond) {
+        timeStr[5] = '\0';
+        timeStr[2] = timeStr[7] % 2 == 0 ? ':' : ' ';
+    }
 }
 
 void AppletClock::draw(MD_Parola *matrix) {

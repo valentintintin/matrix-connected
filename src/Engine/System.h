@@ -3,11 +3,15 @@
 
 #include <MD_Parola.h>
 #include <Ticker.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClientSecure.h>
 
 #include "Orchestror.h"
 #include "Utils.h"
+#include "Timer.h"
 
 #define NB_MAX_ORCHESTROR 1
+#define INTERVAL_PING_PIXEL_SERVER (1000 * 60 * 30)
 
 #define ZONE 0
 
@@ -27,22 +31,21 @@ const char* const PROGMEM weekDays[] = { sunday, monday, tuesday, wednesday, thu
 
 class System {
 public:
-    explicit System(MD_Parola *matrix, bool enableDong = false, byte soundPin = 255, byte ledPin = 255);
+    explicit System(MD_Parola *matrix, byte numDevices, bool enableDong = false, byte soundPin = 255, byte ledPin = 255, byte mainZone = 0);
 
     void setMatrixActivated(bool activated);
     void setMatrixIntensity(byte intensity);
     void update();
 
-    void setSongToPlay(const char *song);
-    void setLed(bool status) const;
-    void setBlink();
+    bool setSongToPlay(const char *song);
+    bool setLed(bool status) const;
+    bool setBlink();
 
-    void notify();
-    void dong();
-    void alert();
-    void showDateMessage();
+    bool notify();
+    bool dong();
+    bool alert();
+    bool showDateMessage();
 
-    bool addMessage(const String& messageToAdd);
     bool addMessage(const char* messageToAdd);
 
     inline bool isMatrixActivated() const {
@@ -61,23 +64,39 @@ public:
         return orchestrors[idZone];
     }
 
+    inline Orchestror* getMainOrchestor() {
+        return orchestrors[mainZone];
+    }
+
+    void shouldPingPixelServer();
+
+    Applet *getAppletByTypeOnAnyOrchestor(int appletType);
+
 private:
     bool matrixActivated;
     MD_Parola* matrix;
 
     byte soundPin;
     bool enableDong, hasDong;
-    char bufferSong[MAX_LENGTH_SONG], dateStr[64], dayStr[8];
+    char bufferSong[MAX_LENGTH_SONG], dateStr[64], dayStr[8], pingPixelServerPayload[128];
+
+    byte mainZone;
 
     byte ledPin;
     Ticker* blinkTicker;
     byte blinkCounter;
 
+    byte numDevices;
     byte matrixIntensity;
 
     Orchestror* orchestrors[NB_MAX_ORCHESTROR];
 
+    WiFiClientSecure wifiClient;
+    HTTPClient http;
+    Timer timerPingPixelServer;
+
     void blinkProcess();
+    bool pingPixelServer();
 };
 
 

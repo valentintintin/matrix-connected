@@ -11,7 +11,6 @@
 
 <body>
 
-<!-- Header -->
 <header>
   <hgroup>
     <h1>Contrôle horloge</h1>
@@ -27,14 +26,20 @@
       <li>
         <a href="#countdown">Compte à rebours</a>
       </li>
+      <li>
+        <a href="#notifications">Notifications sonores</a>
+      </li>
+      <li>
+        <a href="#debug">Debug</a>
+      </li>
+      <li>
+        <a href="/update">Mise à jour</a>
+      </li>
     </ul>
   </nav>
-</header><!-- ./ Header -->
+</header>
 
-<!-- Main -->
 <main>
-
-  <!-- Form elements-->
   <section id="system">
     <form>
       <h2>Système</h2>
@@ -45,100 +50,180 @@
         <button id="stateOff">Éteindre</button>
       </fieldset>
 
-      <!-- Range slider control -->
       <label for="intensity">Intensité
         <input type="range" min="0" max="15" value="0" id="intensity">
       </label>
     </form>
-  </section><!-- ./ Form elements-->
+  </section>
 
-  <!-- Preview -->
   <section id="message">
     <h2>Message</h2>
     <form>
       <input type="text" id="messageText" placeholder="Texte du message" required>
-      <button type="submit" id="sendMessage">Envoyer</button>
-    </form>
-  </section><!-- ./ Preview -->
 
-  <!-- Form elements-->
+      <label for="durationMessageList">Durée de défilement</label>
+      <select id="durationMessageList">
+        <option value="" selected>Une seule fois</option>
+        <option value="30">30 secondes</option>
+        <option value="60">1 minute</option>
+        <option value="120">2 minute</option>
+        <option value="300">5 minute</option>
+        <option value="600">10 minute</option>
+        <option value="900">15 minute</option>
+        <option value="1800">30 minute</option>
+        <option value="3600">1 heure</option>
+        <option value="7200">2 heures</option>
+      </select>
+
+      <button type="submit" id="sendMessage">Afficher</button>
+      <button type="reset" id="stopMessageLoop">Arrêter</button>
+    </form>
+  </section>
+
   <section id="countdown">
     <form>
       <h2>Compte à rebours</h2>
 
-      <label for="duration">Date et heure
+      <label for="durationList">Durée prédéfinie</label>
+      <select id="durationList">
+        <option value="" selected>Choisir une durée</option>
+        <option value="10">10 secondes</option>
+        <option value="30">30 secondes</option>
+        <option value="60">1 minute</option>
+        <option value="90">1 minute 30</option>
+        <option value="120">2 minute</option>
+        <option value="150">2 minute 30</option>
+        <option value="180">3 minute</option>
+        <option value="300">5 minute</option>
+        <option value="600">10 minute</option>
+        <option value="900">15 minute</option>
+        <option value="1800">30 minute</option>
+        <option value="2700">45 minute</option>
+        <option value="3600">1 heure</option>
+        <option value="5400">1 heure 30</option>
+        <option value="7200">2 heures</option>
+        <option value="14400">4 heures</option>
+        <option value="43200">12 heures</option>
+        <option value="86400">1 jour</option>
+        <option value="172800">2 jours</option>
+        <option value="604800">1 semaine</option>
+        <option value="1209600">2 semaines</option>
+        <option value="2419200">4 semaines</option>
+      </select>
+
+      <label for="duration">Ou date et heure spécifique
         <input type="datetime-local" id="duration">
       </label>
 
-      <!-- Buttons -->
       <input type="button" value="Lancer" id="startCoutdown" />
       <input type="reset" value="Arrêter" id="stopCountdown" />
-
     </form>
-  </section><!-- ./ Form elements-->
+  </section>
 
-</main><!-- ./ Main -->
+  <section id="notifications">
+    <h2>Notifications sonores</h2>
+
+    <fieldset>
+      <legend>Actions</legend>
+      <button id="alert">Son d'alerte</button>
+      <button id="dong">Son simple</button>
+      <button id="notify">Notification (led + sonnerie Dango)</button>
+    </fieldset>
+  </section>
+</main>
+
+<footer id="debug">
+  <section>
+    <h2>Système</h2>
+
+    <fieldset>
+      <legend>Actions</legend>
+      <button id="showRam">RAM utilisée</button>
+      <button id="showUptime">Uptime</button>
+      <button id="showDate">Afficher la date</button>
+      <button id="pingPixelServer">Ping pixel-server.ovh</button>
+    </fieldset>
+  </section>
+
+  <pre id="result"></pre>
+</footer>
 
 <script src="https://www.riccardodegni.com/projects/dommy/serve.php?js=dommy-min"></script>
 
 <script>
+  const host = '';
+
   $$$(function() {
-    $('stateOn').on('click', function (event) {
+    const resultEl = $('result');
+    const durationEl = $('duration');
+    const durationListEl = $('durationList');
+    const messageTextEl = $('messageText');
+    const durationMessageEl = $('durationMessageList');
+
+    $('intensity').on('click', function (event) {
       event.preventDefault();
 
-      this.ajax('/state?state=on', function(data) {
-      }, function(error) {
-        console.error(error);
-      });
-    });
-
-    $('stateOff').on('click', function (event) {
-      event.preventDefault();
-
-      this.ajax('/state?state=off', function(data) {
-      }, function(error) {
-        console.error(error);
-      });
-    });
-
-    $('intensity').on('click', function () {
-      this.ajax('/intensity?val=' + this.value, function(data) {
-      }, function(error) {
-        console.error(error);
-      });
+      request('/intensity?val=' + this.value);
     });
 
     $('sendMessage').on('click', function (event) {
       event.preventDefault();
-      const messageText = $('messageText');
 
-      this.ajax('/message/add?msg=' + messageText.value, function(data) {
-        messageText.value = '';
-      }, function(error) {
-        console.error(error);
+      request('/message/add?msg=' + messageTextEl.value + '&duration=' + durationMessageEl.value, function(data) {
+        messageTextEl.value = '';
       });
     });
 
     $('startCoutdown').on('click', function (event) {
       event.preventDefault();
-      const durationEl = $('duration');
       const duration = ((new Date(durationEl.value).getTime()) - (new Date().getTime())) / 1000;
 
-      this.ajax('/countdown/start?restart=1&duration=' + duration, function(data) {
+      request('/countdown/start?restart=1&duration=' + duration, function(data) {
         durationEl.value = '';
-      }, function(error) {
-        console.error(error);
+        durationListEl.value = '';
       });
     });
 
-    $('stopCountdown').on('click', function (event) {
+    durationListEl.on('click', function (event) {
       event.preventDefault();
 
-      this.ajax('/countdown/stop', function(data) {
+      request('/countdown/start?restart=true&duration=' + this.value, function(data) {
+        durationEl.value = '';
+        durationListEl.value = '';
+      });
+    });
+
+    onClickRequest('stateOn', '/state?val=true');
+    onClickRequest('stateOff', '/state?val=false');
+
+    onClickRequest('stopMessageLoop', '/message/loop/stop');
+    onClickRequest('stopCountdown', '/countdown/stop');
+
+    onClickRequest('notify', '/notify/song');
+    onClickRequest('alert', '/notify/alert');
+    onClickRequest('dong', '/notify/dong');
+
+    onClickRequest('showRam', '/ram');
+    onClickRequest('showUptime', '/uptime');
+    onClickRequest('pingPixelServer', '/ping');
+
+    function onClickRequest(elementName, endPoint, callback = undefined) {
+      $(elementName).on('click', function (event) {
+        event.preventDefault();
+        request(endPoint, callback);
+      });
+    }
+
+    function request(endPoint, callback = undefined) {
+      resultEl.ajax(host + endPoint, function(data) {
+        if (callback) {
+          callback(data);
+        }
+        return JSON.stringify(data);
       }, function(error) {
         console.error(error);
       });
-    });
+    }
   });
 </script>
 </body>

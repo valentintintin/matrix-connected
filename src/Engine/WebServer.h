@@ -19,8 +19,6 @@ public:
 
     AsyncWebServer server;
     DNSServer dns;
-
-private:
 };
 
 #endif
