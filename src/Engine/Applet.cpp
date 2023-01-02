@@ -5,24 +5,21 @@ long Applet::APPLET_ID = 1;
 Applet::Applet(Orchestror *orchestror, const char* name, const byte type, const byte priority) : orchestror(orchestror), type(type), priority(priority), id(APPLET_ID++) {
     strcpy_P(this->name, name);
     DPRINT(F("[APPLET NEW] ")); printSerial();
+    getMatrix()->getDisplayExtent(getIdZone(), startColumn, endColumn);
 }
 
-void Applet::onInit(MD_Parola *matrix) {
+void Applet::onInit() {
     printSerial(); DPRINTLN(F("\tInitiated"));
-    matrix->getDisplayExtent(getIdZone(), startColumn, endColumn);
 }
 
 void Applet::onPause() {
     printSerial(); DPRINTLN(F("\tPaused"));
-
     displayed = false;
 }
 
-void Applet::onResume(MD_Parola *matrix) {
+void Applet::onResume() {
     printSerial(); DPRINTLN(F("\tResumed"));
-
     displayed = true;
-    refresh();
 }
 
 void Applet::onDestroy() {
@@ -38,4 +35,8 @@ void Applet::printSerial() {
 
 byte Applet::getIdZone() const {
     return orchestror->getIdZone();
+}
+
+MD_Parola* Applet::getMatrix() const {
+    return orchestror->getSystem()->getMatrix();
 }

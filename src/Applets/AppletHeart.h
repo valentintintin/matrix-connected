@@ -1,35 +1,25 @@
 #ifndef APPLET_HEART_H
 #define APPLET_HEART_H
 
-#include "../Engine/Applet.h"
+#include "AppletSymbolsAnimated.h"
+#include "FontData.h"
 
 #define HEART_PULSE_MS 325
 
-MD_MAX72XX::fontType_t hearts[] PROGMEM =
-{
-    0, 	// 0
-    6, 0, 12, 18, 36, 18, 12, 	        // 0  Small
-    6, 0, 12, 30, 60, 30, 12, 	        // 1  SmallFilled
-    7, 14, 31, 50, 100, 50, 31, 14, 	// 2  Large
-    7, 14, 31, 62, 124, 62, 31, 14, 	// 3  LargeFilled
-};
-
-class AppletHeart : public Applet {
+class AppletHeart : public AppletSymbolsAnimated {
 
 public:
-    explicit AppletHeart(Orchestror *orchestror);
-
-    void onResume(MD_Parola* matrix) override;
-    bool shouldBeResumed() override;
-    bool shouldBeDestroyed() override;
-    void draw(MD_Parola *matrix) override;
-    void printSerial() override;
-
-private:
-    void setIntensity(MD_Parola *matrix);
-
-    char heartStr[1];
-    byte currentHeart = 0;
+    explicit AppletHeart(Orchestror *orchestror): AppletSymbolsAnimated(orchestror, PSTR("HEAR"), {
+            hearts,
+            4,
+            {
+                    { HEART_PULSE_MS, 1 },
+                    { HEART_PULSE_MS, 3 },
+                    { HEART_PULSE_MS, 1 },
+                    { HEART_PULSE_MS, 3 },
+            }
+    }) {
+    }
 };
 
 #endif

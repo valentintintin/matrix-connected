@@ -3,8 +3,8 @@
 AppletScreenSaver::AppletScreenSaver(Orchestror* orchestror) : Applet(orchestror, PSTR("ScreenSaver"), SCREEN_SAVER), timer(25, true) {
 }
 
-void AppletScreenSaver::onInit(MD_Parola *matrix) {
-    Applet::onInit(matrix);
+void AppletScreenSaver::onInit() {
+    Applet::onInit();
 
     currentRow = 4;
     currentColumn = (getEndColumn() - getStartColumn()) / 2 + getStartColumn();
@@ -20,17 +20,17 @@ bool AppletScreenSaver::shouldBeDestroyed() {
     return false;
 }
 
-void AppletScreenSaver::draw(MD_Parola *matrix) {
+void AppletScreenSaver::draw(bool animationFinished) {
     if (timer.hasExpired()) {
         timer.restart();
 
         if (currentRow == toGoRow && currentColumn == toGoColumn) {
             resetToGo();
-            matrix->displayClear(getIdZone());
-            matrix->getGraphicObject()->setPoint(toGoRow, toGoColumn, true);
+            getMatrix()->displayClear(getIdZone());
+            getMatrix()->getGraphicObject()->setPoint(toGoRow, toGoColumn, !getMatrix()->getInvert());
         }
 
-        matrix->getGraphicObject()->setPoint(currentRow, currentColumn, true);
+        getMatrix()->getGraphicObject()->setPoint(currentRow, currentColumn, !getMatrix()->getInvert());
 
         if (moveDiagonal) {
             doMoveDiagonal();

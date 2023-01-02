@@ -13,7 +13,7 @@ public:
 
     bool shouldBeResumed() override;
     bool shouldBeDestroyed() override;
-    void draw(MD_Parola *matrix) override;
+    void draw(bool animationFinished) override;
     void printSerial() override;
     void stopTimer();
 

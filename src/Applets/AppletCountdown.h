@@ -9,14 +9,14 @@
 class AppletCountdown : public Applet {
 
 public:
-    AppletCountdown(Orchestror *orchestror, unsigned long secondToCount, String name = "", bool songAtTheEnd = true);
+    AppletCountdown(Orchestror *orchestror, unsigned long secondToCount, const char* name = nullptr, bool songAtTheEnd = true);
 
-    void stopTimer(bool forced = false);
+    void stopTimer();
 
     bool shouldBeResumed() override;
     bool shouldBeDestroyed() override;
     void refresh() override;
-    void draw(MD_Parola *matrix) override;
+    void draw(bool animationFinished) override;
     void printSerial() override;
 
 private:

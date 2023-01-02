@@ -1,43 +1,5 @@
 #include "Utils.h"
 
-void millisToString(uint64_t milliseconds, String *timeString) {
-    uint64_t seconds = milliseconds / 1000;
-    milliseconds %= 1000;
-
-    auto minutes = (uint64_t) (seconds / 60);
-    seconds %= 60;
-
-    auto hours = (uint64_t) (minutes / 60);
-    minutes %= 60;
-
-    auto days = (uint64_t) (hours / 24);
-    hours %= 24;
-
-    timeString->remove(0, timeString->length());
-
-    if (days > 0) {
-        *timeString += (uint8_t) days;
-        *timeString += "J ";
-    }
-    if (days > 0 || hours > 0) {
-        *timeString += (uint8_t) hours;
-        *timeString += ":";
-    }
-    if (minutes < 10) {
-        *timeString += "0";
-    }
-    *timeString += (uint8_t) minutes;
-    *timeString += ":";
-    if (seconds < 10) {
-        *timeString += "0";
-    }
-    *timeString += (uint8_t) seconds;
-    if (days == 0) {
-        *timeString += ",";
-        *timeString += (uint16_t) milliseconds;
-    }
-}
-
 void millisToString(uint64_t milliseconds, char *timeString) {
     strcpy_P(timeString, PSTR(""));
 
@@ -133,40 +95,4 @@ void utf8Ascii(char* s)
             *cp++ = c;
     }
     *cp = '\0';   // terminate the new string
-}
-
-void utf8AsciiS(String &s)
-// In place conversion UTF-8 string to Extended ASCII
-// The extended ASCII string is always shorter.
-{
-    uint8_t c;
-    unsigned int iRt = 0;
-
-    for (unsigned int i = 0; i < s.length(); i++) {
-        c = utf8Ascii(s.charAt(i));
-        if (c != '\0') {
-            iRt++;
-            s.setCharAt(i, c);
-        }
-    }
-
-    if (iRt < s.length()) {
-        s.remove(iRt, s.length() - iRt);
-    }
-}
-
-String utf8ascii(String &s)
-{
-    String r = "";
-    char c;
-
-    for (unsigned int i = 0; i < s.length(); i++)
-    {
-        c = utf8Ascii(s.charAt(i));
-        if (c != '\0') {
-            r += c;
-        }
-    }
-
-    return r;
 }

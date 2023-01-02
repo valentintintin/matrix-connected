@@ -11,9 +11,20 @@
 #include "Timer.h"
 
 #define NB_MAX_ORCHESTROR 1
-#define INTERVAL_PING_PIXEL_SERVER (1000 * 60 * 30)
+#define ZONE_MAIN 0
+#define INTENSITY 1
 
-#define ZONE 0
+#ifdef VALENTIN
+#define NB_MAX_ORCHESTROR 3
+#define INTENSITY 5
+#define ZONE_HEART 1
+#define ZONE_CLOCK 2
+#elif defined(WILLYAM)
+#define NB_MAX_ORCHESTROR 2
+#define ZONE_SYMBOL 1
+#endif
+
+#define INTERVAL_PING_PIXEL_SERVER (1000 * 60 * 30)
 
 #define MAX_LENGTH_SONG 255
 const char PROGMEM dongSong[] = "Dong:d=8,o=6,b=180:c,e,g";

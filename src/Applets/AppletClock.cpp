@@ -2,8 +2,9 @@
 
 #include <NtpClientLib.h>
 
-AppletClock::AppletClock(Orchestror *orchestror, bool withSecond) :
-    Applet(orchestror, PSTR("Clock"), CLOCK, 10), withSecond(withSecond) {
+AppletClock::AppletClock(Orchestror *orchestror) :
+    Applet(orchestror, PSTR("Clock"), CLOCK, 10) {
+    withSecond = getNumberColumns() > 4 * 8;
 }
 
 bool AppletClock::shouldBeResumed() {
@@ -25,8 +26,30 @@ void AppletClock::refresh() {
     }
 }
 
-void AppletClock::draw(MD_Parola *matrix) {
-    matrix->displayZoneText(getIdZone(), timeStr, PA_CENTER, 0, 25, PA_PRINT, PA_PRINT);
+void AppletClock::draw(bool animationFinished) {
+    if (animationFinished) {
+        getMatrix()->displayZoneText(getIdZone(), timeStr, PA_CENTER, 0, 25, PA_PRINT, PA_PRINT);
+    }
+
+    if (!withSecond && getMatrix()->isAnimationAdvanced()) {
+        byte secondTen = timeStr[6] - '0';
+
+        getMatrix()->getGraphicObject()->update(false);
+
+        for (byte y = 1; y <= 5; y++) {
+            bool state = secondTen >= y ? !getMatrix()->getInvert() : getMatrix()->getInvert();
+            getMatrix()->getGraphicObject()->setPoint(8 - y, getStartColumn(), state);
+            getMatrix()->getGraphicObject()->setPoint(8 - y, getEndColumn(), state);
+        }
+
+        if (timeStr[7] % 2 != 0) {
+            bool state = timeStr[7] >= '5' ? !getMatrix()->getInvert() : getMatrix()->getInvert();
+            getMatrix()->getGraphicObject()->setPoint(0, getStartColumn(), state);
+            getMatrix()->getGraphicObject()->setPoint(0, getEndColumn(), !state);
+        }
+
+        getMatrix()->getGraphicObject()->update(true);
+    }
 }
 
 void AppletClock::printSerial() {

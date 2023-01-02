@@ -9,7 +9,7 @@ class Orchestror;
 #include "Orchestror.h"
 
 #define CLOCK 0
-#define HEART 1
+#define SYMBOLS_ANIMATED 1
 #define MESSAGE 2
 #define SCREEN_SAVER 3
 #define COUNTDOWN 4
@@ -22,9 +22,9 @@ public:
 
     Applet(Orchestror *orchestror, const char* name, byte type, byte priority = 0);
 
-    virtual void onInit(MD_Parola *matrix);
+    virtual void onInit();
     virtual void onPause();
-    virtual void onResume(MD_Parola *matrix);
+    virtual void onResume();
     virtual void onDestroy();
 
     inline bool isDisplayed() const {
@@ -32,6 +32,7 @@ public:
     }
 
     byte getIdZone() const;
+    MD_Parola* getMatrix() const;
 
     inline long getId() const {
         return id;
@@ -57,23 +58,27 @@ public:
         return endColumn;
     }
 
+    inline uint16_t getNumberColumns() const {
+        return getEndColumn() - getStartColumn() + 1;
+    }
+
     virtual void refresh();
     virtual void printSerial();
 
     virtual bool shouldBeResumed() = 0;
     virtual bool shouldBeDestroyed() = 0;
-    virtual void draw(MD_Parola *matrix) = 0;
+    virtual void draw(bool animationFinished) = 0;
 
 protected:
     Orchestror* orchestror;
 
 private:
-    char name[16];
+    char name[16]{};
     const byte type;
     const byte priority;
     const long id;
     bool displayed = false;
-    uint16_t startColumn, endColumn;
+    uint16_t startColumn{}, endColumn{};
 };
 
 

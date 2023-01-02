@@ -6,6 +6,9 @@
 
 #include "Applets/AppletMessage.h"
 #include "Applets/AppletClock.h"
+#include "Applets/AppletHeart.h"
+#include "Applets/AppletCar.h"
+#include "Applets/AppletScreenSaver.h"
 
 System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPin, byte ledPin, byte mainZone) :
     matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false),
@@ -24,16 +27,42 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
     }
 
     matrix->begin(NB_MAX_ORCHESTROR);
-    matrix->setZone(ZONE, 0, 7);
-    setMatrixIntensity(1);
     matrix->setFont(font);
-    setMatrixActivated(true);
 
-    orchestrors[ZONE] = new Orchestror(this, (byte) ZONE);
+#ifdef VALENTIN
+    matrix->setZone(ZONE_MAIN, 0, 9);
+    matrix->setZone(ZONE_CLOCK, 10, 14);
+    matrix->setZone(ZONE_HEART, 15, 15);
+#elif defined(WILLYAM)
+    matrix->setZone(ZONE_MAIN, 0, 5);
+    matrix->setZone(ZONE_SYMBOL, 6, 7);
+#else
+    matrix->setZone(ZONE_MAIN, 0, numDevices - 1);
+#endif
 
     DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
-    orchestrors[ZONE]->addApplet(new AppletClock(orchestrors[ZONE], numDevices > 4));
-    orchestrors[ZONE]->addApplet(new AppletMessage(orchestrors[ZONE]));
+    orchestrors[ZONE_MAIN] = new Orchestror(this, (byte) ZONE_MAIN);
+    orchestrors[ZONE_MAIN]->addApplet(new AppletMessage(orchestrors[ZONE_MAIN]));
+
+#ifdef VALENTIN
+    orchestrors[ZONE_MAIN]->addApplet(new AppletScreenSaver(orchestrors[ZONE_MAIN]));
+
+    orchestrors[ZONE_HEART] = new Orchestror(this, (byte) ZONE_HEART);
+    orchestrors[ZONE_HEART]->addApplet(new AppletHeart(orchestrors[ZONE_HEART]));
+
+    orchestrors[ZONE_CLOCK] = new Orchestror(this, ZONE_CLOCK);
+    orchestrors[ZONE_CLOCK]->addApplet(new AppletClock(orchestrors[ZONE_CLOCK]));
+#elif defined(WILLYAM)
+    orchestrors[ZONE_MAIN]->addApplet(new AppletClock(orchestrors[ZONE_MAIN]));
+
+    orchestrors[ZONE_SYMBOL] = new Orchestror(this, ZONE_SYMBOL);
+    orchestrors[ZONE_SYMBOL]->addApplet(new AppletCar(orchestrors[ZONE_SYMBOL]));
+#else
+    orchestrors[ZONE_MAIN]->addApplet(new AppletClock(orchestrors[ZONE_MAIN]));
+#endif
+
+    setMatrixIntensity(INTENSITY);
+    setMatrixActivated(true);
 }
 
 void System::setMatrixActivated(bool activated) {
@@ -49,7 +78,7 @@ void System::setMatrixActivated(bool activated) {
 }
 
 void System::setMatrixIntensity(byte intensity) {
-    matrix->setIntensity(matrixIntensity);
+    matrix->setIntensity(intensity);
     matrixIntensity = intensity;
 }
 
@@ -60,7 +89,9 @@ void System::update() {
         matrix->displayAnimate();
 
         for (auto orchestror : orchestrors) {
-            orchestror->update();
+            if (orchestror->shouldBeDisplayed()) {
+                orchestror->update();
+            }
         }
 
         time_t currentTime = now();
@@ -88,7 +119,7 @@ void System::update() {
     }
 
 #ifdef DEBUG
-    delay(75);
+    delay(50);
     Serial.print(F("Heap: ")); Serial.println(ESP.getFreeHeap());
 #endif
 }
@@ -203,8 +234,6 @@ bool System::pingPixelServer() {
     }
 
     http.end();
-
-    delay(5000);
 
     return successCode > 0;
 }

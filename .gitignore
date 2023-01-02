@@ -5,4 +5,4 @@ main
 CMakeList*
 .idea
 cmake-build-nodemcu
-platformio.mine.ini
+platformio_override.ini

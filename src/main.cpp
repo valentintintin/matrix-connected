@@ -13,9 +13,26 @@
 #define LED_PIN 255
 #define SOUND_PIN 255
 #define NUM_DEVICES 8
+#define MATRIX_TYPE MD_MAX72XX::FC16_HW
 
-System systemEngine(new MD_Parola(MD_MAX72XX::ICSTATION_HW, CS_PIN, NUM_DEVICES), NUM_DEVICES, true, SOUND_PIN, LED_PIN);
-//System systemEngine(new MD_Parola(MD_MAX72XX::FC16_HW, CS_PIN, NUM_DEVICES), NUM_DEVICES, true, SOUND_PIN, LED_PIN, ZONE);
+#ifdef VALENTIN
+#define LED_PIN D0
+#define SOUND_PIN D1
+#define NUM_DEVICES 16
+#define MATRIX_TYPE MD_MAX72XX::FC16_HW
+#elif defined(WILLYAM)
+#define LED_PIN 255
+#define SOUND_PIN 255
+#define NUM_DEVICES 8
+#define MATRIX_TYPE MD_MAX72XX::ICSTATION_HW
+#elif defined(VALENTIN_SMALL)
+#define LED_PIN 255
+#define SOUND_PIN 255
+#define NUM_DEVICES 4
+#define MATRIX_TYPE MD_MAX72XX::FC16_HW
+#endif
+
+System systemEngine(new MD_Parola(MATRIX_TYPE, CS_PIN, NUM_DEVICES), NUM_DEVICES, true, SOUND_PIN, LED_PIN);
 
 WebServer webServer(&systemEngine);
 
@@ -49,8 +66,6 @@ void setup() {
     NTP.setTimeZone(1);
     NTP.setDayLight(true);
 
-    systemEngine.addMessage((String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString()).c_str());
-
     webServer.begin();
 
     digitalWrite(LED_BUILTIN, HIGH);
@@ -58,6 +73,10 @@ void setup() {
     DPRINTLN(F("[LED]Low"));
 
     DPRINTLN(F("[PROGRAM]OK"));
+
+#ifndef DEBUG
+    systemEngine.addMessage((String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString()).c_str());
+#endif
 }
 
 void loop() {

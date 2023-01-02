@@ -61,7 +61,11 @@ MD_MAX72XX::fontType_t font[] PROGMEM =
                 5, 1, 1, 121, 5, 3, 	// 55   - european style '7'
                 5, 54, 73, 73, 73, 54, 	// 56   - '8'
                 5, 6, 73, 73, 41, 30, 	// 57   - '9'
+#ifdef VALENTIN_SMALL
                 2, 36, 0, 	// 58   - ':'
+#else
+                1, 36, 	// 58   - ':'
+#endif
                 1, 116, 	// 59   - ';'
                 3, 8, 20, 34, 	// 60   - '<'
                 4, 20, 20, 20, 20, 	// 61   - '='
@@ -258,7 +262,23 @@ MD_MAX72XX::fontType_t font[] PROGMEM =
                 4, 58, 64, 64, 122, 	// 252   - 'ü Latin Small Letter U with diaeresis'
                 4, 24, 160, 162, 121, 	// 253   - 'ý Latin Small Letter Y with acute'
                 4, 252, 40, 40, 16, 	// 254   - 'þ Latin Small Letter Thorn'
-                0, 	// 255
+                4, 157, 160, 160, 125,		// 255 - 'y diaresis'
+        };
+
+MD_MAX72XX::fontType_t hearts[] PROGMEM =
+        {
+                0, 	// 0
+                5, 12, 18, 36, 18, 12, 	        // 0  Small
+                5, 12, 30, 60, 30, 12, 	        // 1  SmallFilled
+                7, 14, 31, 50, 100, 50, 31, 14, 	// 2  Large
+                7, 14, 31, 62, 124, 62, 31, 14, 	// 3  LargeFilled
+        };
+
+MD_MAX72XX::fontType_t cars[] PROGMEM =
+        {
+                0, 	// 0
+                12, 4, 248, 239, 121, 89, 89, 89, 93, 121, 239, 248, 4, 	// 1  car_lights_off
+                12, 4, 248, 255, 121, 89, 89, 89, 93, 121, 255, 248, 4, 	// 2  car_lights_on
         };
 
 #endif //MATRIX_CONNECTED_FONTDATA_H

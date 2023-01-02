@@ -5,8 +5,9 @@
 
 WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     const String& json = F("application/json");
-    const String& trueJson = F("true");
-    const String& falseJson = F("false");
+    const String& trueStr = F("true");
+    const String& trueJson = F("\"true\"");
+    const String& falseJson = F("\"false\"");
     const __FlashStringHelper* durationArg = F("duration");
     const __FlashStringHelper* restartArg = F("restart");
     const __FlashStringHelper* valArg = F("val");
@@ -75,7 +76,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         Applet* applet = orchestror->getAppletByType(COUNTDOWN);
         if (applet != nullptr) {
             if (request->hasArg(restartArg)) {
-                ((AppletCountdown *) applet)->stopTimer(true);
+                orchestror->destroyApplet(applet);
             } else {
                 request->send(403, json, F("\"There is already a countdown. Stop it before add a new one\""));
                 return;
@@ -85,7 +86,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         bool songAtTheEnd = !request->hasArg(F("noSongAtTheEnd"));
 
         if (request->hasArg(durationArg)) {
-            orchestror->addApplet(new AppletCountdown(orchestror, (unsigned long) request->arg(durationArg).toInt(), request->arg(msgArg), songAtTheEnd));
+            orchestror->addApplet(new AppletCountdown(orchestror, (unsigned long) request->arg(durationArg).toInt(), request->arg(msgArg).c_str(), songAtTheEnd));
             request->send(201, json, trueJson);
         } else {
             request->send(400, json, F("\"Missing duration(sec) or msg(optional) parameter in query\""));
@@ -100,14 +101,14 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
             return;
         }
 
-        ((AppletCountdown*) applet)->stopTimer(true);
+        orchestror->destroyApplet(applet);
         request->send(200, json, trueJson);
     });
 
-    server.on(PSTR("/state"), HTTP_GET, [valArg, system, json, trueJson](AsyncWebServerRequest *request) {
+    server.on(PSTR("/state"), HTTP_GET, [valArg, system, json, trueJson, trueStr](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/matrixActivated\t"));
         if (request->hasArg(valArg)) {
-            bool state = request->arg(valArg).equalsIgnoreCase(trueJson);
+            bool state = request->arg(valArg).equalsIgnoreCase(trueStr);
             DPRINT(F("State: ")); DPRINTLN(state);
             system->setMatrixActivated(state);
             request->send(200, json, trueJson);

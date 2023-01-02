@@ -187,10 +187,12 @@
     durationListEl.on('click', function (event) {
       event.preventDefault();
 
-      request('/countdown/start?restart=true&duration=' + this.value, function(data) {
-        durationEl.value = '';
-        durationListEl.value = '';
-      });
+      if (this.value > 0) {
+        request('/countdown/start?restart=true&duration=' + this.value, function (data) {
+          durationEl.value = '';
+          durationListEl.value = '';
+        });
+      }
     });
 
     onClickRequest('stateOn', '/state?val=true');
@@ -205,6 +207,7 @@
 
     onClickRequest('showRam', '/ram');
     onClickRequest('showUptime', '/uptime');
+    onClickRequest('showDate', '/message/date');
     onClickRequest('pingPixelServer', '/ping');
 
     function onClickRequest(elementName, endPoint, callback = undefined) {

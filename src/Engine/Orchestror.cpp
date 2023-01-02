@@ -1,56 +1,56 @@
 #include "Orchestror.h"
 
 Orchestror::Orchestror(System* system, byte idZone) : idZone(idZone), system(system) {
-    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-        applets[i] = nullptr;
-    }
 }
 
 void Orchestror::update() {
     DPRINT(F("[ORCHESTROR ")); DPRINT(idZone); DPRINT(F("]\r\n\t[UPDATE]")); DPRINT(F("NbApplets: ")); DPRINTLN(nbApplets);
 
     MD_Parola* matrix = system->getMatrix();
+    bool animationFinished = matrix->getZoneStatus(idZone);
 
-    if (matrix->getZoneStatus(idZone)) { // Zone animation finished
-        Applet *newApplet = nullptr;
-        for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-            Applet *applet = applets[i];
+    Applet *newApplet = nullptr;
+    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
+        Applet *applet = applets[i];
 
-            if (applet != nullptr) {
-                DPRINT(F("\tBlock ")); DPRINT(i); DPRINT(F("\r\n\t\t"));
-                applet->printSerial();
-
-                applet->refresh();
-
-                DPRINT(F("\t\tShould be destroyed: ")); DPRINTLN(applet->shouldBeDestroyed());
-
-                if (applet->shouldBeDestroyed()) {
-                    destroyApplet(i);
-                    continue;
-                }
-
-                DPRINT(F("\t\tShould be paused: ")); DPRINTLN(applet->shouldBeResumed());
-
-                if (applet->shouldBeResumed()
-                    && (newApplet == nullptr || applet->getPriority() >= newApplet->getPriority())
-                        ) {
-                    newApplet = applet;
-                    DPRINT(F("\tNew applet: ")); DPRINTLN(newApplet->getName());
-                }
-            }
+        if (applet == nullptr) {
+            continue;
         }
 
-        if (newApplet != nullptr) {
-            resumeApplet(newApplet);
+        DPRINT(F("\tBlock ")); DPRINT(i); DPRINT(F("\r\n\t\t"));
+        applet->refresh();
+        applet->printSerial();
 
-            DPRINT(F("\t[Draw]")); DPRINTLN(currentApplet->getName());
-            currentApplet->draw(matrix);
-        } else {
-            DPRINTLN(F("No applet"));
+        DPRINT(F("\t\tShould be destroyed: ")); DPRINTLN(applet->shouldBeDestroyed());
+        if (applet->shouldBeDestroyed()) {
+            destroyApplet(applet);
+
+            // Reset loop
+            newApplet = nullptr;
+            i = -1;
+            continue;
+        }
+
+        DPRINT(F("\t\tShould be resumed: ")); DPRINTLN(applet->shouldBeResumed());
+        if (applet->shouldBeResumed() // Applet wants to be displayed
+            && ( // And
+                newApplet == nullptr  // We do not have applet currently on hand
+                || applet->getPriority() >= newApplet->getPriority() // Or applet as same or greater priority
+            )
+        ) {
+            newApplet = applet; // Applet is candidate to be displayed
+            DPRINT(F("\tNew applet: ")); DPRINTLN(newApplet->getName());
         }
     }
 
-    matrix->synchZoneStart();
+    if (newApplet != nullptr) { // We have a candidate to display
+        resumeApplet(newApplet);
+
+        DPRINT(F("\t[Draw]")); DPRINTLN(currentApplet->getName());
+        currentApplet->draw(animationFinished);
+    } else {
+        DPRINTLN(F("No applet to display"));
+    }
 }
 
 bool Orchestror::addApplet(Applet* applet) {
@@ -65,7 +65,7 @@ bool Orchestror::addApplet(Applet* applet) {
     DPRINT(F("\t"));
 
     nbApplets++;
-    applet->onInit(system->getMatrix());
+    applet->onInit();
 
     // Add new applet and find if there is already one which is displayed
     for (byte i = 0; i < NB_MAX_APPLETS; i++) {
@@ -84,55 +84,77 @@ bool Orchestror::addApplet(Applet* applet) {
 }
 
 void Orchestror::resumeApplet(Applet* applet) {
-    DPRINTLN(F("[ORCHESTROR]Resume applet")); DPRINT(F("\t"));
-
-    if (applet != currentApplet) {
-        if (currentApplet != nullptr) {
-            pauseApplet(currentApplet);
-        }
-
-        applet->onResume(system->getMatrix());
+    if (applet == currentApplet) {
+        return;
     }
+
+    if (currentApplet != nullptr) {
+        pauseApplet(currentApplet);
+    }
+
+    DPRINTLN(F("[ORCHESTROR]Resume applet")); DPRINT(F("\t"));
+    applet->onResume();
 
     currentApplet = applet;
 }
 
-void Orchestror::pauseApplet(Applet* applet, bool displayNext) {
+void Orchestror::pauseApplet(Applet* applet) {
     DPRINTLN(F("[ORCHESTROR]Pause applet")); DPRINT(F("\t"));
 
     applet->onPause();
 
-    currentApplet = nullptr;
-}
-
-void Orchestror::destroyApplet(byte iApplet) {
-    DPRINTLN(F("[ORCHESTROR]Destroy applet")); DPRINT(F("\t"));
-
-    Applet* applet = applets[iApplet];
-
     if (applet == currentApplet) {
         currentApplet = nullptr;
+
+        DPRINTLN(F("[ORCHESTROR]Pause applet : display clear"));
+        system->getMatrix()->setTextEffect(idZone, PA_PRINT, PA_PRINT);
     }
+}
 
-    applet->onDestroy();
-    nbApplets--;
+void Orchestror::destroyApplet(Applet* applet) {
+    DPRINTLN(F("[ORCHESTROR]Destroy applet")); DPRINT(F("\t"));
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdelete-abstract-non-virtual-dtor"
-    delete applet;
-#pragma clang diagnostic pop
+    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
+        Applet *appletI = applets[i]; // Applet in this place
 
-    applets[iApplet] = nullptr;
+        if (appletI == nullptr) {
+            continue;
+        }
+
+        if (appletI == applet) {
+            if (applet == currentApplet) {
+                pauseApplet(applet);
+            }
+
+            applet->onDestroy();
+
+            nbApplets--;
+            applets[i] = nullptr;
+
+            return;
+        }
+    }
 }
 
 Applet *Orchestror::getAppletByType(const byte type) {
-    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-        Applet *applet = applets[i]; // Applet in this place
-
+    for (auto applet : applets) {
         if (applet != nullptr && applet->getType() == type) {
             return applet;
         }
     }
 
     return nullptr;
+}
+
+void Orchestror::setDisplayed(bool state) {
+    isDisplayed = state;
+
+    if (!state) {
+        for (auto applet: applets) {
+            if (applet != nullptr && applet->isDisplayed()) {
+                pauseApplet(applet);
+                return;
+            }
+        }
+    }
 }
