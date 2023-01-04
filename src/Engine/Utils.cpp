@@ -1,6 +1,6 @@
 #include "Utils.h"
 
-void millisToString(uint64_t milliseconds, char *timeString) {
+void millisToString(uint64_t milliseconds, char *timeString, bool withThirdData) {
     strcpy_P(timeString, PSTR(""));
 
     DPRINT(F("[millisToString]")); DPRINT(F("millisSource: ")); DPRINT((uint16_t) milliseconds);
@@ -24,11 +24,23 @@ void millisToString(uint64_t milliseconds, char *timeString) {
     DPRINT(F(", hours: ")); DPRINT((uint8_t) hours);
 
     if (days > 0) {
-        sprintf_P(timeString, PSTR("%dJ %02d:%02d"), (uint8_t) days, (uint8_t) hours, (uint8_t) minutes);
+        if (withThirdData) {
+            sprintf_P(timeString, PSTR("%dJ %02d:%02d"), (uint8_t) days, (uint8_t) hours, (uint8_t) minutes);
+        } else {
+            sprintf_P(timeString, PSTR("%dJ %02d"), (uint8_t) days, (uint8_t) hours);
+        }
     } else if (hours > 0) {
-        sprintf_P(timeString, PSTR("%02d:%02d:%02d"), (uint8_t) hours, (uint8_t) minutes, (uint8_t) seconds);
+        if (withThirdData) {
+            sprintf_P(timeString, PSTR("%02d:%02d:%02d"), (uint8_t) hours, (uint8_t) minutes, (uint8_t) seconds);
+        } else {
+            sprintf_P(timeString, PSTR("%02d:%02d"), (uint8_t) hours, (uint8_t) minutes);
+        }
     } else if (minutes > 0) {
-        sprintf_P(timeString, PSTR("%02d:%02d,%0hu"), (uint8_t) minutes, (uint8_t) seconds, (uint16_t) milliseconds / 100);
+        if (withThirdData) {
+            sprintf_P(timeString, PSTR("%02d:%02d,%0hu"), (uint8_t) minutes, (uint8_t) seconds, (uint16_t) milliseconds / 100);
+        } else {
+            sprintf_P(timeString, PSTR("%02d:%02d"), (uint8_t) minutes, (uint8_t) seconds);
+        }
     } else {
         sprintf_P(timeString, PSTR("%02d,%0hu"), (uint8_t) seconds, (uint16_t) milliseconds / 100);
     }

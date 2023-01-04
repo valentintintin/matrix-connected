@@ -3,6 +3,8 @@
 AppletCountdown::AppletCountdown(Orchestror *orchestror, unsigned long secondToCount, const char* name, bool songAtTheEnd)
     : Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10),
     songAtTheEnd(songAtTheEnd), timer(secondToCount * 1000) {
+    withThirdData = getNumberColumns() > 4 * 8;
+
     if (name != nullptr) {
         strcpy(this->name, name);
 
@@ -28,7 +30,7 @@ void AppletCountdown::refresh() {
     if (!timer.hasExpired()) {
         unsigned long deltaMillis = timer.getTimeLeft();
 
-        millisToString(deltaMillis, timeStr);
+        millisToString(deltaMillis, timeStr, withThirdData);
 
         if (strlen(name) > 1 && deltaMillis % MESSAGE_RECALL_MS_SECOND == 0) {
             orchestror->getSystem()->addMessage(name);
@@ -65,7 +67,9 @@ void AppletCountdown::stopTimer() {
 }
 
 byte AppletCountdown::getPriority() const {
-    if (timer.getTimeLeft() <= PRIORITY_MAX_BELLOW_MS_SECOND) {
+    unsigned long deltaMillis = timer.getTimeLeft();
+
+    if (deltaMillis <= PRIORITY_MAX_BELLOW_MS_SECOND) {
         return 100;
     }
 

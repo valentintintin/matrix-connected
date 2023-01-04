@@ -27,6 +27,7 @@ private:
     char timeStr[16]{};
     char name[MAX_LENGTH_MESSAGE]{};
     char buffer[MAX_LENGTH_MESSAGE + 16]{};
+    bool withThirdData;
 };
 
 #endif

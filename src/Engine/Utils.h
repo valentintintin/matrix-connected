@@ -21,7 +21,7 @@
 #define DPRINTLN(...)
 #endif
 
-void millisToString(uint64_t milliseconds, char *timeString);
+void millisToString(uint64_t milliseconds, char *timeString, bool withThirdData = true);
 
 uint8_t utf8Ascii(uint8_t ascii);
 void utf8Ascii(char* s);
