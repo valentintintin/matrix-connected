@@ -63,3 +63,11 @@ void AppletCountdown::stopTimer() {
         orchestror->getSystem()->notify();
     }
 }
+
+byte AppletCountdown::getPriority() const {
+    if (timer.getTimeLeft() <= PRIORITY_MAX_BELLOW_MS_SECOND) {
+        return 100;
+    }
+
+    return Applet::getPriority();
+}

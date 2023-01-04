@@ -38,7 +38,7 @@ public:
         return id;
     }
 
-    inline byte getPriority() const {
+    virtual inline byte getPriority() const {
         return priority;
     }
 

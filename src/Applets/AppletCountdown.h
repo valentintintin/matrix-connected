@@ -5,6 +5,7 @@
 
 #define MAX_LENGTH_MESSAGE 255
 #define MESSAGE_RECALL_MS_SECOND 240000 // every 4 minutes
+#define PRIORITY_MAX_BELLOW_MS_SECOND MESSAGE_RECALL_MS_SECOND - 30000
 
 class AppletCountdown : public Applet {
 
@@ -18,6 +19,7 @@ public:
     void refresh() override;
     void draw(bool animationFinished) override;
     void printSerial() override;
+    byte getPriority() const override;
 
 private:
     bool songAtTheEnd;
