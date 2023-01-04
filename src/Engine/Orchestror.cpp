@@ -107,6 +107,7 @@ void Orchestror::pauseApplet(Applet* applet) {
         currentApplet = nullptr;
 
         DPRINTLN(F("[ORCHESTROR]Pause applet : display clear"));
+        system->getMatrix()->displayClear(getIdZone());
         system->getMatrix()->setTextEffect(idZone, PA_PRINT, PA_PRINT);
     }
 }
