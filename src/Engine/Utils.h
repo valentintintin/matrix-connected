@@ -9,6 +9,8 @@
 #define AP_SSID "Horloge Willyam"
 #elif defined(VALENTIN_SMALL)
 #define AP_SSID "PixelClock Salle de Bain"
+#elif defined(VALENTIN_SMALL_STATE)
+#define AP_SSID "PixelClock Home State"
 #endif
 
 #include <Arduino.h>

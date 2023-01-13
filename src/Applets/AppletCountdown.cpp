@@ -16,11 +16,11 @@ AppletCountdown::AppletCountdown(Orchestror *orchestror, unsigned long secondToC
     orchestror->getSystem()->alert();
 }
 
-bool AppletCountdown::shouldBeResumed() {
+bool AppletCountdown::shouldBeResumed(bool animationFinished) {
     return !timer.hasExpired();
 }
 
-bool AppletCountdown::shouldBeDestroyed() {
+bool AppletCountdown::shouldBeDestroyed(bool animationFinished) {
     return timer.hasExpired();
 }
 
@@ -31,6 +31,11 @@ void AppletCountdown::refresh() {
         unsigned long deltaMillis = timer.getTimeLeft();
 
         millisToString(deltaMillis, timeStr, withThirdData);
+
+        if (timer.isPaused()) {
+            sprintf_P(buffer, PSTR("P %s"), timeStr);
+            strcpy(timeStr, buffer);
+        }
 
         if (strlen(name) > 1 && deltaMillis % MESSAGE_RECALL_MS_SECOND == 0) {
             orchestror->getSystem()->addMessage(name);

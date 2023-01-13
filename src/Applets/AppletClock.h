@@ -9,8 +9,8 @@ public:
     explicit AppletClock(Orchestror *orchestror);
 
     void refresh() override;
-    bool shouldBeResumed() override;
-    bool shouldBeDestroyed() override;
+    bool shouldBeResumed(bool animationFinished) override;
+    bool shouldBeDestroyed(bool animationFinished) override;
     void draw(bool animationFinished) override;
     void printSerial() override;
 

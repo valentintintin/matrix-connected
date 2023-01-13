@@ -1,7 +1,7 @@
 #ifndef MATRIX_CONNECTED_APPLETMESSAGE_H
 #define MATRIX_CONNECTED_APPLETMESSAGE_H
 
-#include <Queue.h>
+#include <ArduinoQueue.h>
 
 #include "Engine/Applet.h"
 
@@ -13,8 +13,8 @@ class AppletMessage : public Applet {
 public:
     explicit AppletMessage(Orchestror *orchestror);
 
-    bool shouldBeResumed() override;
-    bool shouldBeDestroyed() override;
+    bool shouldBeResumed(bool animationFinished) override;
+    bool shouldBeDestroyed(bool animationFinished) override;
     void draw(bool animationFinished) override;
     void printSerial() override;
 
@@ -22,7 +22,7 @@ public:
 
 private:
     char message[MAX_LENGTH_MESSAGE]{};
-    Queue<char*> messages = Queue<char*>(MAX_MESSAGES);
+    ArduinoQueue<char*> messages = ArduinoQueue<char*>(MAX_MESSAGES);
     bool hasMessage = false;
 
     void popMessage();

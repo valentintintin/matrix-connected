@@ -5,11 +5,11 @@ AppletSymbolsAnimated::AppletSymbolsAnimated(Orchestror *orchestror,
         Applet(orchestror, name, SYMBOLS_ANIMATED), symbolsAnimationSettings(symbolsAnimationSettings) {
 }
 
-bool AppletSymbolsAnimated::shouldBeResumed() {
+bool AppletSymbolsAnimated::shouldBeResumed(bool animationFinished) {
     return true;
 }
 
-bool AppletSymbolsAnimated::shouldBeDestroyed() {
+bool AppletSymbolsAnimated::shouldBeDestroyed(bool animationFinished) {
     return false;
 }
 

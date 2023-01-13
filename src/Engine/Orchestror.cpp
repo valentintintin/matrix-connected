@@ -21,8 +21,8 @@ void Orchestror::update() {
         applet->refresh();
         applet->printSerial();
 
-        DPRINT(F("\t\tShould be destroyed: ")); DPRINTLN(applet->shouldBeDestroyed());
-        if (applet->shouldBeDestroyed()) {
+        DPRINT(F("\t\tShould be destroyed: ")); DPRINTLN(applet->shouldBeDestroyed(animationFinished));
+        if (applet->shouldBeDestroyed(animationFinished)) {
             destroyApplet(applet);
 
             // Reset loop
@@ -31,8 +31,8 @@ void Orchestror::update() {
             continue;
         }
 
-        DPRINT(F("\t\tShould be resumed: ")); DPRINTLN(applet->shouldBeResumed());
-        if (applet->shouldBeResumed() // Applet wants to be displayed
+        DPRINT(F("\t\tShould be resumed: ")); DPRINTLN(applet->shouldBeResumed(animationFinished));
+        if (applet->shouldBeResumed(animationFinished) // Applet wants to be displayed
             && ( // And
                 newApplet == nullptr  // We do not have applet currently on hand
                 || applet->getPriority() >= newApplet->getPriority() // Or applet as same or greater priority

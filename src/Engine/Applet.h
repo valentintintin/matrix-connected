@@ -14,6 +14,7 @@ class Orchestror;
 #define SCREEN_SAVER 3
 #define COUNTDOWN 4
 #define MESSAGE_LOOP 5
+#define STATIC_SYMBOLS 6
 
 class Applet {
 
@@ -65,8 +66,8 @@ public:
     virtual void refresh();
     virtual void printSerial();
 
-    virtual bool shouldBeResumed() = 0;
-    virtual bool shouldBeDestroyed() = 0;
+    virtual bool shouldBeResumed(bool animationFinished) = 0;
+    virtual bool shouldBeDestroyed(bool animationFinished) = 0;
     virtual void draw(bool animationFinished) = 0;
 
 protected:

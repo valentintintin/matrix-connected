@@ -14,6 +14,7 @@
 #define SOUND_PIN 255
 #define NUM_DEVICES 8
 #define MATRIX_TYPE MD_MAX72XX::FC16_HW
+#define DONG true
 
 #ifdef VALENTIN
 #define LED_PIN D0
@@ -30,9 +31,15 @@
 #define SOUND_PIN 255
 #define NUM_DEVICES 4
 #define MATRIX_TYPE MD_MAX72XX::FC16_HW
+#elif defined(VALENTIN_SMALL_STATE)
+#define LED_PIN 255
+#define SOUND_PIN 255
+#define NUM_DEVICES 2
+#define MATRIX_TYPE MD_MAX72XX::GENERIC_HW
+#define DONG false
 #endif
 
-System systemEngine(new MD_Parola(MATRIX_TYPE, CS_PIN, NUM_DEVICES), NUM_DEVICES, true, SOUND_PIN, LED_PIN);
+System systemEngine(new MD_Parola(MATRIX_TYPE, CS_PIN, NUM_DEVICES), NUM_DEVICES, DONG, SOUND_PIN, LED_PIN);
 
 WebServer webServer(&systemEngine);
 

@@ -116,6 +116,8 @@
       </label>
 
       <input type="button" value="Lancer" id="startCoutdown" />
+      <input type="reset" value="Pause" id="pauseCountdown" />
+      <input type="reset" value="Redémarrer" id="resumeCountdown" />
       <input type="reset" value="Arrêter" id="stopCountdown" />
     </form>
   </section>
@@ -199,6 +201,8 @@
     onClickRequest('stateOff', '/state?val=false');
 
     onClickRequest('stopMessageLoop', '/message/loop/stop');
+    onClickRequest('pauseCountdown', '/countdown/pause');
+    onClickRequest('resumeCountdown', '/countdown/resume');
     onClickRequest('stopCountdown', '/countdown/stop');
 
     onClickRequest('notify', '/notify/song');

@@ -9,6 +9,7 @@
 #include "Applets/AppletHeart.h"
 #include "Applets/AppletCar.h"
 #include "Applets/AppletScreenSaver.h"
+#include "Applets/AppletStaticSymbols.h"
 
 System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPin, byte ledPin, byte mainZone) :
     matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false),
@@ -42,7 +43,7 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
 
     DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
     orchestrors[ZONE_MAIN] = new Orchestror(this, (byte) ZONE_MAIN);
-    orchestrors[ZONE_MAIN]->addApplet(new AppletMessage(orchestrors[ZONE_MAIN]));
+//    orchestrors[ZONE_MAIN]->addApplet(new AppletMessage(orchestrors[ZONE_MAIN]));
 
 #ifdef VALENTIN
     orchestrors[ZONE_MAIN]->addApplet(new AppletScreenSaver(orchestrors[ZONE_MAIN]));
@@ -57,6 +58,8 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
 
     orchestrors[ZONE_SYMBOL] = new Orchestror(this, ZONE_SYMBOL);
     orchestrors[ZONE_SYMBOL]->addApplet(new AppletCar(orchestrors[ZONE_SYMBOL]));
+#elif defined(VALENTIN_SMALL_STATE)
+    orchestrors[ZONE_MAIN]->addApplet(new AppletStaticSymbols(orchestrors[ZONE_MAIN], PSTR("HomeAssistant"), homeAssistant));
 #else
     orchestrors[ZONE_MAIN]->addApplet(new AppletClock(orchestrors[ZONE_MAIN]));
 #endif

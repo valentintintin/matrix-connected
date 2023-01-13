@@ -7,11 +7,11 @@ AppletClock::AppletClock(Orchestror *orchestror) :
     withSecond = getNumberColumns() > 4 * 8;
 }
 
-bool AppletClock::shouldBeResumed() {
+bool AppletClock::shouldBeResumed(bool animationFinished) {
     return true;
 }
 
-bool AppletClock::shouldBeDestroyed() {
+bool AppletClock::shouldBeDestroyed(bool animationFinished) {
     return false;
 }
 
@@ -33,6 +33,8 @@ void AppletClock::draw(bool animationFinished) {
 
     if (!withSecond && getMatrix()->isAnimationAdvanced()) {
         byte secondTen = timeStr[6] - '0';
+        byte secondUnit = timeStr[7] - '0';
+        bool secondEven = secondUnit % 2 != 0;
 
         getMatrix()->getGraphicObject()->update(false);
 
@@ -42,10 +44,15 @@ void AppletClock::draw(bool animationFinished) {
             getMatrix()->getGraphicObject()->setPoint(8 - y, getEndColumn(), state);
         }
 
-        if (timeStr[7] % 2 != 0) {
-            bool state = timeStr[7] >= '5' ? !getMatrix()->getInvert() : getMatrix()->getInvert();
-            getMatrix()->getGraphicObject()->setPoint(0, getStartColumn(), state);
-            getMatrix()->getGraphicObject()->setPoint(0, getEndColumn(), !state);
+        if (secondEven) {
+            if (secondUnit == 5) {
+                getMatrix()->getGraphicObject()->setPoint(0, getStartColumn(), !getMatrix()->getInvert());
+                getMatrix()->getGraphicObject()->setPoint(0, getEndColumn(), !getMatrix()->getInvert());
+            } else {
+                bool state = secondUnit > 5 ? !getMatrix()->getInvert() : getMatrix()->getInvert();
+                getMatrix()->getGraphicObject()->setPoint(0, getStartColumn(), state);
+                getMatrix()->getGraphicObject()->setPoint(0, getEndColumn(), !state);
+            }
         }
 
         getMatrix()->getGraphicObject()->update(true);

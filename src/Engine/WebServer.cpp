@@ -2,6 +2,7 @@
 #include "Applets/AppletCountdown.h"
 #include "WebServer.h"
 #include "Applets/AppletMessageLoop.h"
+#include "Applets/AppletStaticSymbols.h"
 
 WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     const String& json = F("application/json");
@@ -71,6 +72,31 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         request->send(200, json, trueJson);
     });
 
+    server.on(PSTR("/symbols/set"), HTTP_GET, [msgArg, restartArg, json, trueJson, falseJson, system, durationArg](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/message/set\t"));
+
+        if (request->hasArg(msgArg) && request->arg(msgArg).length() > 0 && request->hasArg(durationArg)) {
+            String msg = request->arg(msgArg);
+            DPRINT(F("Msg: ")); DPRINTLN(msg);
+
+            unsigned long duration = (unsigned long) request->arg(durationArg).toInt();
+            DPRINT(F("Duration: ")); DPRINTLN((unsigned long) duration);
+
+            Orchestror* orchestror = system->getMainOrchestor();
+            Applet* applet = orchestror->getAppletByType(STATIC_SYMBOLS);
+            if (applet == nullptr) {
+                request->send(500, json, F("\"There is no applet static symbols\""));
+                return;
+            }
+
+            ((AppletStaticSymbols*) applet)->changeSymbols(request->arg(msgArg).c_str(), duration);
+            request->send(201, json, trueJson);
+        } else {
+            DPRINTLN("Missing msd parameter");
+            request->send(400, json, F("\"Missing msg parameter or duration in query\""));
+        }
+    });
+
     server.on(PSTR("/countdown/start"), HTTP_GET, [msgArg, restartArg, json, trueJson, system, durationArg](AsyncWebServerRequest *request) {
         Orchestror* orchestror = system->getMainOrchestor();
         Applet* applet = orchestror->getAppletByType(COUNTDOWN);
@@ -91,6 +117,30 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         } else {
             request->send(400, json, F("\"Missing duration(sec) or msg(optional) parameter in query\""));
         }
+    });
+
+    server.on(PSTR("/countdown/pause"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {
+        Orchestror* orchestror = system->getMainOrchestor();
+        Applet* applet = orchestror->getAppletByType(COUNTDOWN);
+        if (applet == nullptr) {
+            request->send(500, json, F("\"Impossible to get applet\""));
+            return;
+        }
+
+        ((AppletCountdown *) applet)->timer.pause();
+        request->send(200, json, trueJson);
+    });
+
+    server.on(PSTR("/countdown/resume"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {
+        Orchestror* orchestror = system->getMainOrchestor();
+        Applet* applet = orchestror->getAppletByType(COUNTDOWN);
+        if (applet == nullptr) {
+            request->send(500, json, F("\"Impossible to get applet\""));
+            return;
+        }
+
+        ((AppletCountdown *) applet)->timer.resume();
+        request->send(200, json, trueJson);
     });
 
     server.on(PSTR("/countdown/stop"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {

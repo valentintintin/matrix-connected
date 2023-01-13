@@ -12,11 +12,11 @@ void AppletScreenSaver::onInit() {
     resetToGo();
 }
 
-bool AppletScreenSaver::shouldBeResumed() {
+bool AppletScreenSaver::shouldBeResumed(bool animationFinished) {
     return true;
 }
 
-bool AppletScreenSaver::shouldBeDestroyed() {
+bool AppletScreenSaver::shouldBeDestroyed(bool animationFinished) {
     return false;
 }
 

@@ -1,4 +1,5 @@
 #include "Applet.h"
+#include "../FontData.h"
 
 long Applet::APPLET_ID = 1;
 
@@ -20,6 +21,7 @@ void Applet::onPause() {
 void Applet::onResume() {
     printSerial(); DPRINTLN(F("\tResumed"));
     displayed = true;
+    getMatrix()->setFont(getIdZone(), font);
 }
 
 void Applet::onDestroy() {

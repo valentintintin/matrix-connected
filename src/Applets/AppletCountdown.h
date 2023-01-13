@@ -14,17 +14,17 @@ public:
 
     void stopTimer();
 
-    bool shouldBeResumed() override;
-    bool shouldBeDestroyed() override;
+    bool shouldBeResumed(bool animationFinished) override;
+    bool shouldBeDestroyed(bool animationFinished) override;
     void refresh() override;
     void draw(bool animationFinished) override;
     void printSerial() override;
     byte getPriority() const override;
 
+    Timer timer;
 private:
     bool songAtTheEnd;
-    Timer timer;
-    char timeStr[16]{};
+    char timeStr[32]{};
     char name[MAX_LENGTH_MESSAGE]{};
     char buffer[MAX_LENGTH_MESSAGE + 16]{};
     bool withThirdData;

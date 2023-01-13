@@ -11,8 +11,8 @@ class AppletMessageLoop : public Applet {
 public:
     explicit AppletMessageLoop(Orchestror *orchestror, const char* messageToAdd, uint64_t secondToCount);
 
-    bool shouldBeResumed() override;
-    bool shouldBeDestroyed() override;
+    bool shouldBeResumed(bool animationFinished) override;
+    bool shouldBeDestroyed(bool animationFinished) override;
     void draw(bool animationFinished) override;
     void printSerial() override;
     void stopTimer();

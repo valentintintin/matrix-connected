@@ -9,17 +9,17 @@ AppletMessageLoop::AppletMessageLoop(Orchestror *orchestror, const char* message
     utf8Ascii(message);
 }
 
-bool AppletMessageLoop::shouldBeResumed() {
-    return !timer.hasExpired();
+bool AppletMessageLoop::shouldBeResumed(bool animationFinished) {
+    return !timer.hasExpired() || !animationFinished;
 }
 
-bool AppletMessageLoop::shouldBeDestroyed() {
+bool AppletMessageLoop::shouldBeDestroyed(bool animationFinished) {
     return timer.hasExpired();
 }
 
 void AppletMessageLoop::draw(bool animationFinished) {
     if (animationFinished) {
-        getMatrix()->displayZoneText(getIdZone(), message, PA_CENTER, 25, 1500, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+        getMatrix()->displayZoneText(getIdZone(), message, PA_CENTER, 25, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
     }
 }
 
