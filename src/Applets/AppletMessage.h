@@ -18,7 +18,7 @@ public:
     void draw(bool animationFinished) override;
     void printSerial() override;
 
-    void addMessage(const char* messageToAdd);
+    bool addMessage(const char* messageToAdd);
 
 private:
     char message[MAX_LENGTH_MESSAGE]{};

@@ -51,7 +51,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
                 if (system->addMessage(msg.c_str())) {
                     request->send(201, json, trueJson);
                 } else {
-                    request->send(500, json, F("\"Impossible to get applet\""));
+                    request->send(500, json, F("\"Impossible to get applet or message queue full\""));
                 }
             }
         } else {
@@ -82,8 +82,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
             unsigned long duration = (unsigned long) request->arg(durationArg).toInt();
             DPRINT(F("Duration: ")); DPRINTLN((unsigned long) duration);
 
-            Orchestror* orchestror = system->getMainOrchestor();
-            Applet* applet = orchestror->getAppletByType(STATIC_SYMBOLS);
+            Applet* applet = system->getAppletByTypeOnAnyOrchestor(STATIC_SYMBOLS);
             if (applet == nullptr) {
                 request->send(500, json, F("\"There is no applet static symbols\""));
                 return;
@@ -184,6 +183,11 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         request->send(200, json, String(NTP.getUptime()));
     });
 
+    server.on(PSTR("/version"), HTTP_GET, [json](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/version"));
+        request->send(200, json, String(VERSION));
+    });
+
     server.on(PSTR("/notify/dong"), HTTP_GET, [system, json, trueJson, falseJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/notify/dong\t"));
         bool result = system->dong();
@@ -205,6 +209,12 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     server.on(PSTR("/message/date"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {
         DPRINTLN(F("[WEB SERVER]/message/date\t"));
         system->showDateMessage();
+        request->send(200, json, trueJson);
+    });
+
+    server.on(PSTR("/reboot"), HTTP_GET, [system, json, trueJson](AsyncWebServerRequest *request) {
+        DPRINTLN(F("[WEB SERVER]/reboot\t"));
+        ESP.restart();
         request->send(200, json, trueJson);
     });
 

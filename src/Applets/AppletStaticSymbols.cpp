@@ -35,6 +35,7 @@ void AppletStaticSymbols::changeSymbols(const char *symbols, uint64_t secondToCo
 //        this->symbols[i + 1] = '\0';
 //    }
     strcpy(this->symbols, symbols);
+    getMatrix()->displayReset(getIdZone());
     timer.setInterval(secondToCount * 1000, true);
 }
 

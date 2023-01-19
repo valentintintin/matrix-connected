@@ -143,6 +143,7 @@
       <button id="showRam">RAM utilisée</button>
       <button id="showUptime">Uptime</button>
       <button id="showDate">Afficher la date</button>
+      <button id="showVersion">Version</button>
       <button id="pingPixelServer">Ping pixel-server.ovh</button>
     </fieldset>
   </section>
@@ -213,6 +214,7 @@
     onClickRequest('showUptime', '/uptime');
     onClickRequest('showDate', '/message/date');
     onClickRequest('pingPixelServer', '/ping');
+    onClickRequest('showVersion', '/version');
 
     function onClickRequest(elementName, endPoint, callback = undefined) {
       $(elementName).on('click', function (event) {

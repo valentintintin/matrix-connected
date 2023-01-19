@@ -31,9 +31,9 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
     matrix->setFont(font);
 
 #ifdef VALENTIN
-    matrix->setZone(ZONE_MAIN, 0, 9);
-    matrix->setZone(ZONE_CLOCK, 10, 14);
-    matrix->setZone(ZONE_HEART, 15, 15);
+    matrix->setZone(ZONE_MAIN, 0, 8);
+    matrix->setZone(ZONE_CLOCK, 9, 13);
+    matrix->setZone(ZONE_HEART, 14, 15);
 #elif defined(WILLYAM)
     matrix->setZone(ZONE_MAIN, 0, 5);
     matrix->setZone(ZONE_SYMBOL, 6, 7);
@@ -43,13 +43,14 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
 
     DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
     orchestrors[ZONE_MAIN] = new Orchestror(this, (byte) ZONE_MAIN);
-//    orchestrors[ZONE_MAIN]->addApplet(new AppletMessage(orchestrors[ZONE_MAIN]));
+    orchestrors[ZONE_MAIN]->addApplet(new AppletMessage(orchestrors[ZONE_MAIN]));
 
 #ifdef VALENTIN
     orchestrors[ZONE_MAIN]->addApplet(new AppletScreenSaver(orchestrors[ZONE_MAIN]));
 
     orchestrors[ZONE_HEART] = new Orchestror(this, (byte) ZONE_HEART);
     orchestrors[ZONE_HEART]->addApplet(new AppletHeart(orchestrors[ZONE_HEART]));
+    orchestrors[ZONE_HEART]->addApplet(new AppletStaticSymbols(orchestrors[ZONE_HEART], PSTR("HomeAssistant"), homeAssistant));
 
     orchestrors[ZONE_CLOCK] = new Orchestror(this, ZONE_CLOCK);
     orchestrors[ZONE_CLOCK]->addApplet(new AppletClock(orchestrors[ZONE_CLOCK]));
@@ -60,6 +61,9 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
     orchestrors[ZONE_SYMBOL]->addApplet(new AppletCar(orchestrors[ZONE_SYMBOL]));
 #elif defined(VALENTIN_SMALL_STATE)
     orchestrors[ZONE_MAIN]->addApplet(new AppletStaticSymbols(orchestrors[ZONE_MAIN], PSTR("HomeAssistant"), homeAssistant));
+
+    matrix->setZoneEffect(ZONE_MAIN, true, PA_FLIP_UD);
+    matrix->setZoneEffect(ZONE_MAIN, true, PA_FLIP_LR);
 #else
     orchestrors[ZONE_MAIN]->addApplet(new AppletClock(orchestrors[ZONE_MAIN]));
 #endif
@@ -184,9 +188,7 @@ bool System::addMessage(const char* messageToAdd) {
         return false;
     }
 
-    ((AppletMessage*) applet)->addMessage(messageToAdd);
-
-    return true;
+    return ((AppletMessage*) applet)->addMessage(messageToAdd);
 }
 
 bool System::notify() {

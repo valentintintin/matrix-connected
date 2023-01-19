@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define VERSION 1.6
 #define AP_SSID "Horloge"
 
 #ifdef VALENTIN
@@ -10,7 +11,7 @@
 #elif defined(VALENTIN_SMALL)
 #define AP_SSID "PixelClock Salle de Bain"
 #elif defined(VALENTIN_SMALL_STATE)
-#define AP_SSID "PixelClock Home State"
+#define AP_SSID "PixelClock HomeAssistant"
 #endif
 
 #include <Arduino.h>

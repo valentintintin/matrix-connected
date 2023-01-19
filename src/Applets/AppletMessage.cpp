@@ -17,7 +17,10 @@ void AppletMessage::draw(bool animationFinished) {
     if (animationFinished) {
         if (!messages.isEmpty()) {
             popMessage();
-            getMatrix()->displayZoneText(getIdZone(), message, PA_LEFT, 25, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+            getMatrix()->displayZoneText(getIdZone(), message, PA_LEFT, 25, 0,
+                                         getMatrix()->getZoneEffect(getIdZone(), PA_FLIP_LR) ? PA_SCROLL_RIGHT : PA_SCROLL_LEFT,
+                                         getMatrix()->getZoneEffect(getIdZone(), PA_FLIP_LR) ? PA_SCROLL_RIGHT : PA_SCROLL_LEFT
+            );
         } else {
             hasMessage = false;
             message[0] = '\0';
@@ -29,10 +32,10 @@ void AppletMessage::printSerial() {
     Applet::printSerial(); DPRINT(F("\tMessage: ")); DPRINT(message); DPRINT(F(", Nb message: ")); DPRINT(messages.itemCount()); DPRINT(F(", Has messages: ")); DPRINTLN(hasMessage);
 }
 
-void AppletMessage::addMessage(const char* messageToAdd) {
+bool AppletMessage::addMessage(const char* messageToAdd) {
     Applet::printSerial(); DPRINT(F("\tAddMessage: ")); DPRINT(messageToAdd); DPRINT(F(", Nb message: ")); DPRINT(messages.itemCount()); DPRINT(F(", Has messages: ")); DPRINTLN(hasMessage);
 
-    if (!messages.isEmpty()) {
+    if (!messages.isFull()) {
         char* messageToShow = (char*)malloc ((strlen(messageToAdd) + 1) * sizeof (char));
         strcpy(messageToShow, messageToAdd);
 
@@ -40,8 +43,11 @@ void AppletMessage::addMessage(const char* messageToAdd) {
 
         messages.enqueue(messageToShow);
         hasMessage = true;
+
+        return true;
     } else {
         DPRINTLN(F("Too much messages, leave it !"));
+        return false;
     }
 }
 

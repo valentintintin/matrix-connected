@@ -19,7 +19,10 @@ bool AppletMessageLoop::shouldBeDestroyed(bool animationFinished) {
 
 void AppletMessageLoop::draw(bool animationFinished) {
     if (animationFinished) {
-        getMatrix()->displayZoneText(getIdZone(), message, PA_CENTER, 25, 0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+        getMatrix()->displayZoneText(getIdZone(), message, PA_CENTER, 25, 0,
+                                     getMatrix()->getZoneEffect(getIdZone(), PA_FLIP_LR) ? PA_SCROLL_RIGHT : PA_SCROLL_LEFT,
+                                     getMatrix()->getZoneEffect(getIdZone(), PA_FLIP_LR) ? PA_SCROLL_RIGHT : PA_SCROLL_LEFT
+         );
     }
 }
 

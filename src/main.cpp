@@ -60,6 +60,8 @@ void setup() {
     digitalWrite(LED_BUILTIN, LOW);
     systemEngine.setLed(HIGH);
 
+    WiFi.hostname(AP_SSID);
+
     DPRINTLN(F("[WIFI MANAGER]Start"));
     AsyncWiFiManager wifiManager(&webServer.server, &webServer.dns);
     wifiManager.setDebugOutput(false);
