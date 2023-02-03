@@ -9,10 +9,6 @@ bool AppletSymbolsAnimated::shouldBeResumed(bool animationFinished) {
     return true;
 }
 
-bool AppletSymbolsAnimated::shouldBeDestroyed(bool animationFinished) {
-    return false;
-}
-
 void AppletSymbolsAnimated::draw(bool animationFinished) {
     if (animationFinished) {
         currentSymbol++;
@@ -35,4 +31,9 @@ void AppletSymbolsAnimated::printSerial() {
 void AppletSymbolsAnimated::onResume() {
     Applet::onResume();
     getMatrix()->setFont(getIdZone(), symbolsAnimationSettings.font);
+}
+
+void AppletSymbolsAnimated::onPause() {
+    Applet::onPause();
+    getMatrix()->setIntensity(getIdZone(), orchestror->getSystem()->getMatrixIntensity());
 }

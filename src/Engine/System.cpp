@@ -5,19 +5,18 @@
 #include "FontData.h"
 
 #include "Applets/AppletMessage.h"
+#include "Applets/AppletCountdown.h"
 #include "Applets/AppletClock.h"
 #include "Applets/AppletHeart.h"
 #include "Applets/AppletCar.h"
 #include "Applets/AppletScreenSaver.h"
 #include "Applets/AppletStaticSymbols.h"
 
-System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPin, byte ledPin, byte mainZone) :
+System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPin, byte ledPin, byte mainZone, bool resetDisplay) :
     matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false),
     mainZone(mainZone), ledPin(ledPin), blinkTicker(new Ticker()),
-    numDevices(numDevices), timerPingPixelServer(INTERVAL_PING_PIXEL_SERVER, true) {
+    resetDisplay(resetDisplay), timerPingPixelServer(INTERVAL_PING_PIXEL_SERVER, true) {
     wifiClient.setInsecure();
-
-    DPRINTLN(F("[MATRIX]Start"));
 
     if (soundPin != 255) {
         pinMode(soundPin, OUTPUT);
@@ -41,9 +40,9 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
     matrix->setZone(ZONE_MAIN, 0, numDevices - 1);
 #endif
 
-    DPRINT(F("[ORCHESTROR]")); DPRINT(NB_MAX_APPLETS); DPRINTLN(F(" applets max"));
     orchestrors[ZONE_MAIN] = new Orchestror(this, (byte) ZONE_MAIN);
     orchestrors[ZONE_MAIN]->addApplet(new AppletMessage(orchestrors[ZONE_MAIN]));
+    orchestrors[ZONE_MAIN]->addApplet(new AppletCountdown(orchestrors[ZONE_MAIN]));
 
 #ifdef VALENTIN
     orchestrors[ZONE_MAIN]->addApplet(new AppletScreenSaver(orchestrors[ZONE_MAIN]));
@@ -64,6 +63,9 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
 
     matrix->setZoneEffect(ZONE_MAIN, true, PA_FLIP_UD);
     matrix->setZoneEffect(ZONE_MAIN, true, PA_FLIP_LR);
+#elif defined(VALENTIN_SMALL)
+    orchestrors[ZONE_MAIN]->addApplet(new AppletClock(orchestrors[ZONE_MAIN]));
+    orchestrors[ZONE_MAIN]->addApplet(new AppletStaticSymbols(orchestrors[ZONE_MAIN], PSTR("HomeAssistant"), homeAssistant));
 #else
     orchestrors[ZONE_MAIN]->addApplet(new AppletClock(orchestrors[ZONE_MAIN]));
 #endif
@@ -73,8 +75,6 @@ System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPi
 }
 
 void System::setMatrixActivated(bool activated) {
-    DPRINTLN(F("[ORCHESTROR]Change matrixActivated to ")); DPRINTLN(matrixActivated);
-
     matrixActivated = activated;
 
     matrix->displayShutdown(!matrixActivated);
@@ -90,8 +90,6 @@ void System::setMatrixIntensity(byte intensity) {
 }
 
 void System::update() {
-    DPRINT(F("[SYSTEM]MatrixActivated: ")); DPRINT(isMatrixActivated()); DPRINTLN(F("]\r\n\t[UPDATE]"));
-
     if (isMatrixActivated()) {
         matrix->displayAnimate();
 
@@ -126,8 +124,7 @@ void System::update() {
     }
 
 #ifdef DEBUG
-    delay(50);
-    Serial.print(F("Heap: ")); Serial.println(ESP.getFreeHeap());
+    DPRINT(F("[System]Heap: ")); DPRINTLN(ESP.getFreeHeap());
 #endif
 }
 
@@ -192,19 +189,16 @@ bool System::addMessage(const char* messageToAdd) {
 }
 
 bool System::notify() {
-    DPRINTLN(F("[SYSTEM]Notify"));
     setBlink();
     return setSongToPlay(dangoSong);
 }
 
 bool System::dong() {
-    DPRINTLN(F("[SYSTEM]Dong"));
     setBlink();
     return setSongToPlay(dongSong);
 }
 
 bool System::alert() {
-    DPRINTLN(F("[SYSTEM]Alert"));
     setBlink();
     return setSongToPlay(alertSong);
 }
@@ -214,31 +208,32 @@ bool System::showDateMessage() {
 
     dayStr[0] = '\0';
     strcpy_P(dayStr, (char*) pgm_read_dword(&(weekDays[weekday(moment) - 1])));
-    sprintf_P(dateStr, PSTR("On est le %s %02d/%02d/%4d"), dayStr, day(moment), month(moment), year(moment));
+    sprintf_P(dateStr, PSTR("Date : %s %02d/%02d/%4d"), dayStr, day(moment), month(moment), year(moment));
 
     return addMessage(dateStr);
 }
 
 bool System::pingPixelServer() {
-    DPRINTLN(F("[System]pingPixelServer"));
-
     http.begin(wifiClient, F("http://pixel-server.ovh/esp_clock/index.php"));
     http.addHeader(F("Content-Type"), F("application/x-www-form-urlencoded"));
 
     rst_info *resetInfo = ESP.getResetInfoPtr();
-    sprintf_P(pingPixelServerPayload, PSTR("name=%s&uptime=%ld&restartReason=%d"), F(AP_SSID), NTP.getUptime(), resetInfo->reason);
-
-    DPRINT(F("[System]pingPixelServer payload: ")); DPRINTLN(pingPixelServerPayload);
+    sprintf_P(pingPixelServerPayload, PSTR("name=%s&uptime=%lu&restartReason=%d&heap=%lu&version=%.2f"), F(AP_SSID), NTP.getUptime(), resetInfo->reason, ESP.getFreeHeap(), VERSION);
 
     int successCode = http.POST(pingPixelServerPayload);
 
     if (successCode <= 0) {
         DPRINT(F("[System]pingPixelServer: Error code ")); DPRINTLN(http.errorToString(successCode));
-    } else {
-        DPRINT(F("[System]pingPixelServer: ")); DPRINTLN(http.getString());
     }
 
     http.end();
+
+    if (resetDisplay && isMatrixActivated()) {
+        DPRINTLN(F("[System]resetDisplay"));
+
+        matrix->displayShutdown(true);
+        matrix->displayShutdown(false);
+    }
 
     return successCode > 0;
 }

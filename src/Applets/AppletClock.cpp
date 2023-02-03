@@ -11,10 +11,6 @@ bool AppletClock::shouldBeResumed(bool animationFinished) {
     return true;
 }
 
-bool AppletClock::shouldBeDestroyed(bool animationFinished) {
-    return false;
-}
-
 void AppletClock::refresh() {
     Applet::refresh();
 

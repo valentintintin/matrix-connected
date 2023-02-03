@@ -4,8 +4,6 @@ Orchestror::Orchestror(System* system, byte idZone) : idZone(idZone), system(sys
 }
 
 void Orchestror::update() {
-    DPRINT(F("[ORCHESTROR ")); DPRINT(idZone); DPRINT(F("]\r\n\t[UPDATE]")); DPRINT(F("NbApplets: ")); DPRINTLN(nbApplets);
-
     MD_Parola* matrix = system->getMatrix();
     bool animationFinished = matrix->getZoneStatus(idZone);
 
@@ -17,21 +15,9 @@ void Orchestror::update() {
             continue;
         }
 
-        DPRINT(F("\tBlock ")); DPRINT(i); DPRINT(F("\r\n\t\t"));
         applet->refresh();
         applet->printSerial();
 
-        DPRINT(F("\t\tShould be destroyed: ")); DPRINTLN(applet->shouldBeDestroyed(animationFinished));
-        if (applet->shouldBeDestroyed(animationFinished)) {
-            destroyApplet(applet);
-
-            // Reset loop
-            newApplet = nullptr;
-            i = -1;
-            continue;
-        }
-
-        DPRINT(F("\t\tShould be resumed: ")); DPRINTLN(applet->shouldBeResumed(animationFinished));
         if (applet->shouldBeResumed(animationFinished) // Applet wants to be displayed
             && ( // And
                 newApplet == nullptr  // We do not have applet currently on hand
@@ -39,30 +25,20 @@ void Orchestror::update() {
             )
         ) {
             newApplet = applet; // Applet is candidate to be displayed
-            DPRINT(F("\tNew applet: ")); DPRINTLN(newApplet->getName());
         }
     }
 
     if (newApplet != nullptr) { // We have a candidate to display
         resumeApplet(newApplet);
 
-        DPRINT(F("\t[Draw]")); DPRINTLN(currentApplet->getName());
         currentApplet->draw(animationFinished);
-    } else {
-        DPRINTLN(F("No applet to display"));
     }
 }
 
 bool Orchestror::addApplet(Applet* applet) {
-    DPRINTLN(F("[ORCHESTROR]Add applet"));
-
     if (nbApplets >= NB_MAX_APPLETS) {
-        DPRINTLN(F("\tKO (too much)"));
-
         return false;
     }
-
-    DPRINT(F("\t"));
 
     nbApplets++;
     applet->onInit();
@@ -72,10 +48,7 @@ bool Orchestror::addApplet(Applet* applet) {
         Applet *appletFor = applets[i]; // Applet in this place
 
         if (appletFor == nullptr) { // Free block, new applet add in this place
-            DPRINT(F("\tFound block ")); DPRINTLN(i);
-
             applets[i] = applet;
-
             break; // Nothing more to do
         }
     }
@@ -92,48 +65,19 @@ void Orchestror::resumeApplet(Applet* applet) {
         pauseApplet(currentApplet);
     }
 
-    DPRINTLN(F("[ORCHESTROR]Resume applet")); DPRINT(F("\t"));
     applet->onResume();
 
     currentApplet = applet;
 }
 
 void Orchestror::pauseApplet(Applet* applet) {
-    DPRINTLN(F("[ORCHESTROR]Pause applet")); DPRINT(F("\t"));
-
     applet->onPause();
 
     if (applet == currentApplet) {
         currentApplet = nullptr;
 
-        DPRINTLN(F("[ORCHESTROR]Pause applet : display clear"));
         system->getMatrix()->displayClear(getIdZone());
         system->getMatrix()->setTextEffect(idZone, PA_PRINT, PA_PRINT);
-    }
-}
-
-void Orchestror::destroyApplet(Applet* applet) {
-    DPRINTLN(F("[ORCHESTROR]Destroy applet")); DPRINT(F("\t"));
-
-    for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-        Applet *appletI = applets[i]; // Applet in this place
-
-        if (appletI == nullptr) {
-            continue;
-        }
-
-        if (appletI == applet) {
-            if (applet == currentApplet) {
-                pauseApplet(applet);
-            }
-
-            applet->onDestroy();
-
-            nbApplets--;
-            applets[i] = nullptr;
-
-            return;
-        }
     }
 }
 

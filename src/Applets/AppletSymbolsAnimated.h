@@ -22,8 +22,8 @@ public:
     explicit AppletSymbolsAnimated(Orchestror *orchestror, const char* name, const SymbolAnimationSettings symbolsAnimationSettings);
 
     void onResume() override;
+    void onPause() override;
     bool shouldBeResumed(bool animationFinished) override;
-    bool shouldBeDestroyed(bool animationFinished) override;
     void draw(bool animationFinished) override;
     void printSerial() override;
 

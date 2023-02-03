@@ -26,7 +26,6 @@ public:
     virtual void onInit();
     virtual void onPause();
     virtual void onResume();
-    virtual void onDestroy();
 
     inline bool isDisplayed() const {
         return displayed;
@@ -67,7 +66,6 @@ public:
     virtual void printSerial();
 
     virtual bool shouldBeResumed(bool animationFinished) = 0;
-    virtual bool shouldBeDestroyed(bool animationFinished) = 0;
     virtual void draw(bool animationFinished) = 0;
 
 protected:

@@ -24,7 +24,7 @@
 #define ZONE_SYMBOL 1
 #endif
 
-#define INTERVAL_PING_PIXEL_SERVER (1000 * 60 * 30)
+#define INTERVAL_PING_PIXEL_SERVER (1000 * 60 * 10)
 
 #define MAX_LENGTH_SONG 255
 const char PROGMEM dongSong[] = "Dong:d=8,o=6,b=180:c,e,g";
@@ -42,7 +42,7 @@ const char* const PROGMEM weekDays[] = { sunday, monday, tuesday, wednesday, thu
 
 class System {
 public:
-    explicit System(MD_Parola *matrix, byte numDevices, bool enableDong = false, byte soundPin = 255, byte ledPin = 255, byte mainZone = 0);
+    explicit System(MD_Parola *matrix, byte numDevices, bool enableDong = false, byte soundPin = 255, byte ledPin = 255, byte mainZone = 0, bool resetDisplay = false);
 
     void setMatrixActivated(bool activated);
     void setMatrixIntensity(byte intensity);
@@ -92,12 +92,12 @@ private:
     char bufferSong[MAX_LENGTH_SONG], dateStr[64], dayStr[8], pingPixelServerPayload[128];
 
     byte mainZone;
+    bool resetDisplay;
 
     byte ledPin;
     Ticker* blinkTicker;
     byte blinkCounter;
 
-    byte numDevices;
     byte matrixIntensity;
 
     Orchestror* orchestrors[NB_MAX_ORCHESTROR];

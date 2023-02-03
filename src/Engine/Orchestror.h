@@ -21,7 +21,6 @@ public:
     bool addApplet(Applet* applet);
     void pauseApplet(Applet* applet);
     void resumeApplet(Applet* applet);
-    void destroyApplet(Applet* applet);
     void setDisplayed(bool state);
 
     Applet* getAppletByType(byte type);

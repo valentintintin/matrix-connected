@@ -3,25 +3,18 @@
 void millisToString(uint64_t milliseconds, char *timeString, bool withThirdData) {
     strcpy_P(timeString, PSTR(""));
 
-    DPRINT(F("[millisToString]")); DPRINT(F("millisSource: ")); DPRINT((uint16_t) milliseconds);
-
     uint64_t seconds = milliseconds / 1000;
     milliseconds %= 1000;
-    DPRINT(F(", millis: ")); DPRINT((uint16_t) milliseconds);
 
     auto minutes = (uint64_t) (seconds / 60);
     seconds %= 60;
-    DPRINT(F(", seconds: ")); DPRINT((uint8_t) seconds);
 
     auto hours = (uint64_t) (minutes / 60);
     minutes %= 60;
-    DPRINT(F(", minutes: ")); DPRINT((uint8_t) minutes);
 
     auto days = (uint64_t) (hours / 24);
-    DPRINT(F(", days: ")); DPRINT((uint8_t) days);
 
     hours %= 24;
-    DPRINT(F(", hours: ")); DPRINT((uint8_t) hours);
 
     if (days > 0) {
         if (withThirdData) {
@@ -42,10 +35,12 @@ void millisToString(uint64_t milliseconds, char *timeString, bool withThirdData)
             sprintf_P(timeString, PSTR("%02d:%02d"), (uint8_t) minutes, (uint8_t) seconds);
         }
     } else {
-        sprintf_P(timeString, PSTR("%02d,%0hu"), (uint8_t) seconds, (uint16_t) milliseconds / 100);
+        if (withThirdData) {
+            sprintf_P(timeString, PSTR("%02d,%0hu"), (uint8_t) seconds, (uint16_t) milliseconds / 100);
+        } else {
+            sprintf_P(timeString, PSTR("%d"), (uint8_t) seconds);
+        }
     }
-
-    DPRINT(F(", timeString: ")); DPRINTLN(timeString);
 }
 
 uint8_t utf8Ascii(uint8_t ascii)

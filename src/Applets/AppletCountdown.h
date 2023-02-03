@@ -5,28 +5,34 @@
 
 #define MAX_LENGTH_MESSAGE 255
 #define MESSAGE_RECALL_MS_SECOND 240000 // every 4 minutes
-#define PRIORITY_MAX_BELLOW_MS_SECOND MESSAGE_RECALL_MS_SECOND - 30000
+#define PRIORITY_MAX_BELLOW_MS_SECOND 180000 // 3 minutes
 
 class AppletCountdown : public Applet {
 
 public:
-    AppletCountdown(Orchestror *orchestror, unsigned long secondToCount, const char* name = nullptr, bool songAtTheEnd = true);
+    AppletCountdown(Orchestror *orchestror);
 
-    void stopTimer();
+    void startTimer(unsigned long secondToCount, const char* name = nullptr);
+    void stopTimer(bool withEnd = true);
 
     bool shouldBeResumed(bool animationFinished) override;
-    bool shouldBeDestroyed(bool animationFinished) override;
     void refresh() override;
     void draw(bool animationFinished) override;
     void printSerial() override;
     byte getPriority() const override;
 
-    Timer timer;
+    inline bool currentlyRunning() const {
+        return isRunning;
+    }
+
+    Timer timer = Timer(0);
 private:
-    bool songAtTheEnd;
+    bool isRunning = false;
+
     char timeStr[32]{};
     char name[MAX_LENGTH_MESSAGE]{};
     char buffer[MAX_LENGTH_MESSAGE + 16]{};
+
     bool withThirdData;
 };
 

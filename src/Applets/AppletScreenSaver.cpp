@@ -16,10 +16,6 @@ bool AppletScreenSaver::shouldBeResumed(bool animationFinished) {
     return true;
 }
 
-bool AppletScreenSaver::shouldBeDestroyed(bool animationFinished) {
-    return false;
-}
-
 void AppletScreenSaver::draw(bool animationFinished) {
     if (timer.hasExpired()) {
         timer.restart();

@@ -15,6 +15,7 @@
 #define NUM_DEVICES 8
 #define MATRIX_TYPE MD_MAX72XX::FC16_HW
 #define DONG true
+#define RESET_DISPLAY false
 
 #ifdef VALENTIN
 #define LED_PIN D0
@@ -27,6 +28,7 @@
 #define NUM_DEVICES 8
 #define MATRIX_TYPE MD_MAX72XX::ICSTATION_HW
 #elif defined(VALENTIN_SMALL)
+#define RESET_DISPLAY true
 #define LED_PIN 255
 #define SOUND_PIN 255
 #define NUM_DEVICES 4
@@ -39,7 +41,7 @@
 #define DONG false
 #endif
 
-System systemEngine(new MD_Parola(MATRIX_TYPE, CS_PIN, NUM_DEVICES), NUM_DEVICES, DONG, SOUND_PIN, LED_PIN);
+System systemEngine(new MD_Parola(MATRIX_TYPE, CS_PIN, NUM_DEVICES), NUM_DEVICES, DONG, SOUND_PIN, LED_PIN, RESET_DISPLAY);
 
 WebServer webServer(&systemEngine);
 
@@ -53,16 +55,12 @@ void setup() {
     Serial.begin(115200);
     randomSeed(analogRead(0));
 
-    DPRINTLN(F("[PROGRAM]Start"));
-
     pinMode(LED_BUILTIN, OUTPUT);
-    DPRINTLN(F("[LED]High"));
     digitalWrite(LED_BUILTIN, LOW);
     systemEngine.setLed(HIGH);
 
     WiFi.hostname(AP_SSID);
 
-    DPRINTLN(F("[WIFI MANAGER]Start"));
     AsyncWiFiManager wifiManager(&webServer.server, &webServer.dns);
     wifiManager.setDebugOutput(false);
     //wifiManager.setAPCallback(configModeCallback);
@@ -70,7 +68,6 @@ void setup() {
 
     Serial.println(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
 
-    DPRINTLN(F("[NTP]Start"));
     NTP.begin();
     NTP.setTimeZone(1);
     NTP.setDayLight(true);
@@ -79,12 +76,13 @@ void setup() {
 
     digitalWrite(LED_BUILTIN, HIGH);
     systemEngine.setLed(LOW);
-    DPRINTLN(F("[LED]Low"));
 
     DPRINTLN(F("[PROGRAM]OK"));
 
 #ifndef DEBUG
-    systemEngine.addMessage((String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString()).c_str());
+    char temp[64];
+    sprintf_P(temp, PSTR("%s IP: %s V%.2f"), AP_SSID, WiFi.localIP().toString().substring(9).c_str(), VERSION);
+    systemEngine.addMessage(temp);
 #endif
 }
 

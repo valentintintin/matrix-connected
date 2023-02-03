@@ -1,27 +1,12 @@
 #include "AppletCountdown.h"
 
-AppletCountdown::AppletCountdown(Orchestror *orchestror, unsigned long secondToCount, const char* name, bool songAtTheEnd)
-    : Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10),
-    songAtTheEnd(songAtTheEnd), timer(secondToCount * 1000) {
+AppletCountdown::AppletCountdown(Orchestror *orchestror)
+    : Applet(orchestror, PSTR("Countdown"), COUNTDOWN, 10) {
     withThirdData = getNumberColumns() > 4 * 8;
-
-    if (name != nullptr) {
-        strcpy(this->name, name);
-
-        if (!orchestror->getSystem()->addMessage(this->name)) {
-            DPRINTLN(F("Impossible to get applet message"));
-        }
-    }
-
-    orchestror->getSystem()->alert();
 }
 
 bool AppletCountdown::shouldBeResumed(bool animationFinished) {
-    return !timer.hasExpired();
-}
-
-bool AppletCountdown::shouldBeDestroyed(bool animationFinished) {
-    return timer.hasExpired();
+    return isRunning;
 }
 
 void AppletCountdown::refresh() {
@@ -40,7 +25,7 @@ void AppletCountdown::refresh() {
         if (strlen(name) > 1 && deltaMillis % MESSAGE_RECALL_MS_SECOND == 0) {
             orchestror->getSystem()->addMessage(name);
         }
-    } else {
+    } else if (isRunning) {
         stopTimer();
     }
 }
@@ -52,21 +37,36 @@ void AppletCountdown::draw(bool animationFinished) {
 }
 
 void AppletCountdown::printSerial() {
-    Applet::printSerial(); DPRINT(F("\tName: ")); DPRINTLN(name); DPRINT(F(", Time: ")); DPRINTLN(timeStr);
+    Applet::printSerial(); DPRINT(F("\tName: ")); DPRINT(name); DPRINT(F(", Time: ")); DPRINTLN(timeStr);
 }
 
-void AppletCountdown::stopTimer() {
+void AppletCountdown::startTimer(unsigned long secondToCount, const char *name) {
+    if (name != nullptr) {
+        strcpy(this->name, name);
+
+        if (secondToCount > PRIORITY_MAX_BELLOW_MS_SECOND && !orchestror->getSystem()->addMessage(this->name)) {
+            DPRINTLN(F("Impossible to add countdown message start"));
+        }
+    }
+
+    timer.setInterval(secondToCount * 1000, true);
+    isRunning = true;
+
+    orchestror->getSystem()->alert();
+}
+
+
+void AppletCountdown::stopTimer(bool withEnd) {
+    isRunning = false;
     timer.setExpired();
 
-    if (strlen(name) > 1) {
-        buffer[0] = '\0';
-        sprintf_P(buffer, PSTR("Fin de %s !"), name);
-    } else {
-        strcpy_P(buffer, PSTR("Fin !"));
-    }
-    orchestror->getSystem()->addMessage(buffer);
+    if (withEnd) {
+        sprintf_P(buffer, PSTR("Fin du décompte %s !"), name);
 
-    if (songAtTheEnd) {
+        if (!orchestror->getSystem()->addMessage(buffer)) {
+            DPRINTLN(F("Impossible to add countdown message end"));
+        }
+
         orchestror->getSystem()->notify();
     }
 }
