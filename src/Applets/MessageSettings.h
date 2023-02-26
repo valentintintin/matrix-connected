@@ -1,9 +1,14 @@
 #ifndef MESSAGE_SETTING_H
 #define MESSAGE_SETTING_H
 
-typedef struct MessageSettings {
-    const char* message;
+typedef struct MessageLongSettings {
+    char message[126];
     uint64_t durationSeconds;
-} MessageSettings;
+} MessageLongSettings;
+
+typedef struct MessageShortSettings {
+    char message[8];
+    uint64_t durationSeconds;
+} MessageShortSettings;
 
 #endif

@@ -1,13 +1,13 @@
 #ifndef MATRIX_CONNECTED_APPLETSTATICSYMBOLS_H
 #define MATRIX_CONNECTED_APPLETSTATICSYMBOLS_H
 
-#include <ArduinoQueue.h>
+#include <CircularBuffer.h>
 
 #include "Engine/Applet.h"
 #include "MessageSettings.h"
 
-#define MAX_MESSAGES 10
-#define MAX_LENGTH_MESSAGE 4
+#define MAX_SYMBOLS 5
+#define MAX_LENGTH_SYMBOLS 4
 
 class AppletStaticSymbols : public Applet {
 
@@ -20,12 +20,12 @@ public:
     void draw(bool animationFinished) override;
     void printSerial() override;
 
-    bool addSymbols(const char* symbols, uint64_t secondToCount);
+    void addSymbols(const char* symbols, uint64_t secondToCount);
 private:
     MD_MAX72XX::fontType_t* font;
 
-    char symbols[MAX_LENGTH_MESSAGE + 1]{};
-    ArduinoQueue<MessageSettings> messages = ArduinoQueue<MessageSettings>(MAX_MESSAGES);
+    char symbols[MAX_LENGTH_SYMBOLS + 1]{};
+    CircularBuffer<MessageShortSettings, MAX_SYMBOLS> messages;
     Timer timer;
 
     bool hasSymbols = false;

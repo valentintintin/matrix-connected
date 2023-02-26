@@ -1,7 +1,7 @@
 #ifndef MATRIX_CONNECTED_APPLETMESSAGE_H
 #define MATRIX_CONNECTED_APPLETMESSAGE_H
 
-#include <ArduinoQueue.h>
+#include <CircularBuffer.h>
 
 #include "Engine/Applet.h"
 #include "Engine/Timer.h"
@@ -21,11 +21,12 @@ public:
     void draw(bool animationFinished) override;
     void printSerial() override;
 
-    bool addMessage(const char* messageToAdd, uint64_t durationSeconds = 0);
+    void addMessage(const char* messageToAdd, uint64_t durationSeconds = 0);
 
 private:
     char message[MAX_LENGTH_MESSAGE]{};
-    ArduinoQueue<MessageSettings> messages = ArduinoQueue<MessageSettings>(MAX_MESSAGES);
+    CircularBuffer<MessageLongSettings, MAX_MESSAGES> messages;
+
     bool hasMessage = false;
     bool isLoopMessage = false;
     Timer timer = Timer(0);

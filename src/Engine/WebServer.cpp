@@ -28,18 +28,13 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         }
 
         if (request->hasArg(msgArg) && request->arg(msgArg).length() > 0) {
-            String msg = request->arg(msgArg);
-
             unsigned long duration = 0;
             if (request->hasArg(durationArg)) {
                 duration = (unsigned long) request->arg(durationArg).toInt();
             }
 
-            if (applet->addMessage(msg.c_str(), duration)) {
-                request->send(201, json, trueJson);
-            } else {
-                request->send(500, json, F("\"Impossible to get applet or message queue full\""));
-            }
+            applet->addMessage(request->arg(msgArg).c_str(), duration);
+            request->send(201, json, trueJson);
         } else {
             request->send(400, json, F("\"Missing msg parameter in query\""));
         }
@@ -65,11 +60,8 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
                 return;
             }
 
-            if (applet->addSymbols(request->arg(msgArg).c_str(), (unsigned long) request->arg(durationArg).toInt())) {
-                request->send(201, json, trueJson);
-            } else {
-                request->send(500, json, F("\"Impossible to get applet or message queue full\""));
-            }
+            applet->addSymbols(request->arg(msgArg).c_str(), (unsigned long) request->arg(durationArg).toInt());
+            request->send(201, json, trueJson);
         } else {
             request->send(400, json, F("\"Missing msg parameter or duration in query\""));
         }

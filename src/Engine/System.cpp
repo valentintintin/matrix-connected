@@ -179,13 +179,15 @@ void System::blinkProcess() {
 }
 
 bool System::addMessage(const char* messageToAdd) {
-    Applet* applet = getAppletByTypeOnAnyOrchestor(MESSAGE);
+    AppletMessage* applet = (AppletMessage*) getAppletByTypeOnAnyOrchestor(MESSAGE);
 
     if (applet == nullptr) {
         return false;
     }
 
-    return ((AppletMessage*) applet)->addMessage(messageToAdd);
+    applet->addMessage(messageToAdd);
+
+    return true;
 }
 
 bool System::notify() {

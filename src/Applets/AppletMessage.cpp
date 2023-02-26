@@ -32,42 +32,36 @@ void AppletMessage::draw(bool animationFinished) {
 
 void AppletMessage::printSerial() {
     Applet::printSerial(); DPRINT(F("\tMessage: ")); DPRINT(message);
-    DPRINT(F(", Nb message: ")); DPRINT(messages.itemCount());
+    DPRINT(F(", Nb message: ")); DPRINT(messages.size());
     DPRINT(F(", Has messages: ")); DPRINT(hasMessage);
     DPRINT(F(", Timer : ")); DPRINT(timer.getTimeLeft());
     DPRINT(F(", isLoop : ")); DPRINTLN(isLoopMessage);
 }
 
-bool AppletMessage::addMessage(const char* messageToAdd, uint64_t durationSeconds) {
-    if (!messages.isFull()) {
-        char* messageToShow = (char*)malloc ((strlen(messageToAdd) + 1) * sizeof(char));
-        strcpy(messageToShow, messageToAdd);
-        utf8Ascii(messageToShow);
-
-        MessageSettings messageSettings = {
-                messageToShow,
-                durationSeconds
-        };
-
-        messages.enqueue(messageSettings);
-        hasMessage = true;
-
-        return true;
-    } else {
-        DPRINTLN(F("Too much messages, leave it !"));
-        return false;
+void AppletMessage::addMessage(const char* messageToAdd, uint64_t durationSeconds) {
+    if (messages.isFull()) {
+        messages.pop();
     }
+
+    MessageLongSettings messageSettings = {
+            {'\0'},
+            durationSeconds
+    };
+
+    strcpy(messageSettings.message, messageToAdd);
+//    utf8Ascii(messageSettings.message);
+
+    messages.push(messageSettings);
+    hasMessage = true;
 }
 
 void AppletMessage::popMessage() {
-    MessageSettings newMessage = messages.dequeue();
+    MessageLongSettings newMessage = messages.pop();
     DPRINT(F("New message: ")); DPRINTLN(newMessage.message); printSerial();
 
     strcpy(this->message, newMessage.message);
     timer.setInterval(newMessage.durationSeconds * 1000, true);
     isLoopMessage = newMessage.durationSeconds > 0;
-
-    delete newMessage.message;
 }
 
 void AppletMessage::stopTimer() {
