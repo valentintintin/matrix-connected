@@ -3,8 +3,6 @@
 
 #include <MD_Parola.h>
 #include <Ticker.h>
-#include <ESP8266HTTPClient.h>
-#include <WiFiClientSecure.h>
 
 #include "Orchestror.h"
 #include "Utils.h"
@@ -24,9 +22,10 @@
 #define ZONE_SYMBOL 1
 #endif
 
-#define INTERVAL_PING_PIXEL_SERVER (1000 * 60 * 10)
+#define INTERVAL_REFRESH_DISPLAY (1000 * 60 * 10)
 
 #define MAX_LENGTH_SONG 255
+
 const char PROGMEM dongSong[] = "Dong:d=8,o=6,b=180:c,e,g";
 const char PROGMEM alertSong[] = "Alert:d=8,o=5,b=120:c,c#,e,e#,g,g#";
 const char PROGMEM dangoSong[] = "Dango:d=4,o=5,b=200:4f,4d#,2g#,2g#,2a#,2a#,3c.6,2g#,2d#,4f,4d#,2g#,2g#,2a#,2a#,4c6,4c6,2g#.,4f,4d#,2g#,2g#,2a#,2a#,3c.6,2g#,2d#,4f,4d#,2g#,2g#,4a#,4a#,4g#";
@@ -42,7 +41,7 @@ const char* const PROGMEM weekDays[] = { sunday, monday, tuesday, wednesday, thu
 
 class System {
 public:
-    explicit System(MD_Parola *matrix, byte numDevices, bool enableDong = false, byte soundPin = 255, byte ledPin = 255, byte mainZone = 0, bool resetDisplay = false);
+    explicit System(MD_Parola *matrix, byte numDevices, bool enableDong = false, byte soundPin = 255, byte ledPin = 255, bool resetDisplay = false, byte mainZone = 0);
 
     void setMatrixActivated(bool activated);
     void setMatrixIntensity(byte intensity);
@@ -79,35 +78,30 @@ public:
         return orchestrors[mainZone];
     }
 
-    void shouldPingPixelServer();
-
     Applet *getAppletByTypeOnAnyOrchestor(int appletType);
 
 private:
     bool matrixActivated;
-    MD_Parola* matrix;
+    MD_Parola *matrix;
 
     byte soundPin;
     bool enableDong, hasDong;
-    char bufferSong[MAX_LENGTH_SONG], dateStr[64], dayStr[8], pingPixelServerPayload[128];
+    char bufferSong[MAX_LENGTH_SONG], dateStr[64], dayStr[8];
 
     byte mainZone;
     bool resetDisplay;
 
     byte ledPin;
-    Ticker* blinkTicker;
+    Ticker blinkTicker;
     byte blinkCounter;
 
     byte matrixIntensity;
 
     Orchestror* orchestrors[NB_MAX_ORCHESTROR];
 
-    WiFiClientSecure wifiClient;
-    HTTPClient http;
-    Timer timerPingPixelServer;
+    Timer timerRefreshDisplay;
 
     void blinkProcess();
-    bool pingPixelServer();
 };
 
 

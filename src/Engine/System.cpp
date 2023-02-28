@@ -12,12 +12,9 @@
 #include "Applets/AppletScreenSaver.h"
 #include "Applets/AppletStaticSymbols.h"
 
-System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPin, byte ledPin, byte mainZone, bool resetDisplay) :
-    matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false),
-    mainZone(mainZone), ledPin(ledPin), blinkTicker(new Ticker()),
-    resetDisplay(resetDisplay), timerPingPixelServer(INTERVAL_PING_PIXEL_SERVER, true) {
-    wifiClient.setInsecure();
-
+System::System(MD_Parola *matrix, byte numDevices, bool enableDong, byte soundPin, byte ledPin, bool resetDisplay, byte mainZone) :
+        matrix(matrix), soundPin(soundPin), enableDong(enableDong), hasDong(false),
+        mainZone(mainZone), ledPin(ledPin), resetDisplay(resetDisplay), timerRefreshDisplay(INTERVAL_REFRESH_DISPLAY, true) {
     if (soundPin != 255) {
         pinMode(soundPin, OUTPUT);
     }
@@ -118,9 +115,14 @@ void System::update() {
         delay(matrix->getSpeed());
     }
 
-    if (timerPingPixelServer.hasExpired()) {
-        pingPixelServer();
-        timerPingPixelServer.restart();
+    if (resetDisplay && isMatrixActivated() && timerRefreshDisplay.hasExpired()) {
+        DPRINTLN(F("[System]resetDisplay"));
+
+        matrix->displayShutdown(true);
+        delay(10);
+        matrix->displayShutdown(false);
+
+        timerRefreshDisplay.restart();
     }
 
 #ifdef DEBUG
@@ -153,7 +155,7 @@ bool System::setBlink() {
     if (ledPin != 255) {
         setLed(LOW);
         blinkCounter = 0;
-        blinkTicker->attach_ms(300, [this] {
+        blinkTicker.attach_ms(300, [this] {
             this->blinkProcess();
         });
 
@@ -168,12 +170,12 @@ void System::blinkProcess() {
 
     ++blinkCounter;
     if (blinkCounter == 10) {
-        blinkTicker->detach();
-        blinkTicker->attach_ms(100, [this] {
+        blinkTicker.detach();
+        blinkTicker.attach_ms(100, [this] {
             this->blinkProcess();
         });
     } else if (blinkCounter == 30) {
-        blinkTicker->detach();
+        blinkTicker.detach();
         setLed(LOW);
     }
 }
@@ -215,43 +217,16 @@ bool System::showDateMessage() {
     return addMessage(dateStr);
 }
 
-bool System::pingPixelServer() {
-    http.begin(wifiClient, F("http://pixel-server.ovh/esp_clock/index.php"));
-    http.addHeader(F("Content-Type"), F("application/x-www-form-urlencoded"));
-
-    rst_info *resetInfo = ESP.getResetInfoPtr();
-    sprintf_P(pingPixelServerPayload, PSTR("name=%s&uptime=%lu&restartReason=%d&heap=%lu&version=%.2f"), F(AP_SSID), NTP.getUptime(), resetInfo->reason, ESP.getFreeHeap(), VERSION);
-
-    int successCode = http.POST(pingPixelServerPayload);
-
-    if (successCode <= 0) {
-        DPRINT(F("[System]pingPixelServer: Error code ")); DPRINTLN(http.errorToString(successCode));
-    }
-
-    http.end();
-
-    if (resetDisplay && isMatrixActivated()) {
-        DPRINTLN(F("[System]resetDisplay"));
-
-        matrix->displayShutdown(true);
-        matrix->displayShutdown(false);
-    }
-
-    return successCode > 0;
-}
-
-void System::shouldPingPixelServer() {
-    timerPingPixelServer.setExpired();
-}
-
 Applet *System::getAppletByTypeOnAnyOrchestor(int appletType) {
     for (auto orchestror : orchestrors) {
-        for (byte i = 0; i < NB_MAX_APPLETS; i++) {
-            Applet *applet = orchestror->getAppletByType(appletType);
+        if (orchestror == nullptr) {
+            continue;
+        }
 
-            if (applet != nullptr) {
-                return applet;
-            }
+        Applet *applet = orchestror->getAppletByType(appletType);
+
+        if (applet != nullptr) {
+            return applet;
         }
     }
 

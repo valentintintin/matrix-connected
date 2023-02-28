@@ -41,7 +41,8 @@
 #define DONG false
 #endif
 
-System systemEngine(new MD_Parola(MATRIX_TYPE, CS_PIN, NUM_DEVICES), NUM_DEVICES, DONG, SOUND_PIN, LED_PIN, RESET_DISPLAY);
+MD_Parola parola(MATRIX_TYPE, CS_PIN, NUM_DEVICES);
+System systemEngine(&parola, NUM_DEVICES, DONG, SOUND_PIN, LED_PIN, RESET_DISPLAY);
 
 WebServer webServer(&systemEngine);
 

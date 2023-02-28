@@ -88,6 +88,7 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
         }
     });
 
+    // todo fix Timer computation
     server.on(PSTR("/countdown/pause"), HTTP_GET, [system, json, trueJson, impossibleToGetApplet](AsyncWebServerRequest *request) {
         Orchestror* orchestror = system->getMainOrchestor();
         AppletCountdown* applet = (AppletCountdown*) orchestror->getAppletByType(COUNTDOWN);
@@ -135,7 +136,6 @@ WebServer::WebServer(System* system) : server(AsyncWebServer(80)) {
     });
 
     server.on(PSTR("/ping"), HTTP_GET, [json, trueJson, falseJson, system](AsyncWebServerRequest *request) {
-        system->shouldPingPixelServer();
         request->send(200, json, trueJson);
     });
 

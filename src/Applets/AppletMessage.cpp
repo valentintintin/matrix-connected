@@ -49,7 +49,7 @@ void AppletMessage::addMessage(const char* messageToAdd, uint64_t durationSecond
     };
 
     strcpy(messageSettings.message, messageToAdd);
-//    utf8Ascii(messageSettings.message);
+    utf8Ascii(messageSettings.message);
 
     messages.push(messageSettings);
     hasMessage = true;

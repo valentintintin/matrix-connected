@@ -25,7 +25,7 @@ public:
         return isRunning;
     }
 
-    Timer timer = Timer(0);
+    Timer timer = Timer();
 private:
     bool isRunning = false;
 
