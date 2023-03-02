@@ -144,7 +144,7 @@
       <button id="showUptime">Uptime</button>
       <button id="showDate">Afficher la date</button>
       <button id="showVersion">Version</button>
-      <button id="pingPixelServer">Ping pixel-server.ovh</button>
+      <button id="ping">Ping</button>
     </fieldset>
   </section>
 
@@ -213,7 +213,7 @@
     onClickRequest('showRam', '/ram');
     onClickRequest('showUptime', '/uptime');
     onClickRequest('showDate', '/message/date');
-    onClickRequest('pingPixelServer', '/ping');
+    onClickRequest('ping', '/ping');
     onClickRequest('showVersion', '/version');
 
     function onClickRequest(elementName, endPoint, callback = undefined) {

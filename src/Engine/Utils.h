@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define VERSION 1.11
+#define VERSION 1.13
 #define AP_SSID "Horloge"
 
 #ifdef VALENTIN
@@ -24,9 +24,9 @@
 #define DPRINTLN(...)
 #endif
 
-void millisToString(uint64_t milliseconds, char *timeString, bool withThirdData = true);
+void millisToString(unsigned long milliseconds, char *timeString, bool withThirdData = true);
 
-uint8_t utf8Ascii(uint8_t ascii);
+byte utf8Ascii(byte ascii);
 void utf8Ascii(char* s);
 
 #endif

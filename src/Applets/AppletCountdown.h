@@ -2,8 +2,8 @@
 #define APPLET_COUNTDOWN_H
 
 #include "Engine/Applet.h"
+#include "MessageSettings.h"
 
-#define MAX_LENGTH_MESSAGE 255
 #define MESSAGE_RECALL_MS_SECOND 240000 // every 4 minutes
 #define PRIORITY_MAX_BELLOW_MS_SECOND 180000 // 3 minutes
 
@@ -31,7 +31,7 @@ private:
 
     char timeStr[32]{};
     char name[MAX_LENGTH_MESSAGE]{};
-    char buffer[MAX_LENGTH_MESSAGE + 16]{};
+    char buffer[MAX_LENGTH_MESSAGE + 32]{};
 
     bool withThirdData;
 };

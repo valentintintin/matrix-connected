@@ -42,10 +42,15 @@ void AppletCountdown::printSerial() {
 
 void AppletCountdown::startTimer(unsigned long secondToCount, const char *name) {
     if (name != nullptr) {
-        strcpy(this->name, name);
+        if (strlen(name) >= MAX_LENGTH_MESSAGE - 1) {
+            Serial.print(F("Message countdown too long: ")); Serial.println(strlen(name));
+        } else {
+            sprintf_P(buffer, PSTR("Lancement du décompte %s !"), name);
+            strcpy(this->name, name);
 
-        if (secondToCount > PRIORITY_MAX_BELLOW_MS_SECOND && !orchestror->getSystem()->addMessage(this->name)) {
-            DPRINTLN(F("Impossible to add countdown message start"));
+            if (secondToCount * 1000 < PRIORITY_MAX_BELLOW_MS_SECOND || !orchestror->getSystem()->addMessage(buffer)) {
+                DPRINTLN(F("Impossible to add countdown message start"));
+            }
         }
     }
 

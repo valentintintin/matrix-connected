@@ -47,7 +47,7 @@ unsigned long Timer::getTimeLeft() const {
 }
 
 void Timer::pause() {
-    if (isPaused()) {
+    if (isPaused() || getTimeLeft() <= 1) {
         return;
     }
 
@@ -58,7 +58,7 @@ void Timer::resume() {
     if (!isPaused()) {
         return;
     }
-    timeLast = millis() - getTimeLeft();
-    timePause = 0;
+
+    setInterval(getTimeLeft());
 }
 

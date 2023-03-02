@@ -1,49 +1,49 @@
 #include "Utils.h"
 
-void millisToString(uint64_t milliseconds, char *timeString, bool withThirdData) {
+void millisToString(unsigned long milliseconds, char *timeString, bool withThirdData) {
     strcpy_P(timeString, PSTR(""));
 
-    uint64_t seconds = milliseconds / 1000;
+    unsigned long seconds = milliseconds / 1000;
     milliseconds %= 1000;
 
-    auto minutes = (uint64_t) (seconds / 60);
+    auto minutes = (unsigned long) (seconds / 60);
     seconds %= 60;
 
-    auto hours = (uint64_t) (minutes / 60);
+    auto hours = (unsigned long) (minutes / 60);
     minutes %= 60;
 
-    auto days = (uint64_t) (hours / 24);
+    auto days = (unsigned long) (hours / 24);
 
     hours %= 24;
 
     if (days > 0) {
         if (withThirdData) {
-            sprintf_P(timeString, PSTR("%dJ %02d:%02d"), (uint8_t) days, (uint8_t) hours, (uint8_t) minutes);
+            sprintf_P(timeString, PSTR("%dJ %02d:%02d"), (byte) days, (byte) hours, (byte) minutes);
         } else {
-            sprintf_P(timeString, PSTR("%dJ %02d"), (uint8_t) days, (uint8_t) hours);
+            sprintf_P(timeString, PSTR("%dJ %02d"), (byte) days, (byte) hours);
         }
     } else if (hours > 0) {
         if (withThirdData) {
-            sprintf_P(timeString, PSTR("%02d:%02d:%02d"), (uint8_t) hours, (uint8_t) minutes, (uint8_t) seconds);
+            sprintf_P(timeString, PSTR("%02d:%02d:%02d"), (byte) hours, (byte) minutes, (byte) seconds);
         } else {
-            sprintf_P(timeString, PSTR("%02d:%02d"), (uint8_t) hours, (uint8_t) minutes);
+            sprintf_P(timeString, PSTR("%02d:%02d"), (byte) hours, (byte) minutes);
         }
     } else if (minutes > 0) {
         if (withThirdData) {
-            sprintf_P(timeString, PSTR("%02d:%02d,%0hu"), (uint8_t) minutes, (uint8_t) seconds, (uint16_t) milliseconds / 100);
+            sprintf_P(timeString, PSTR("%02d:%02d,%0hu"), (byte) minutes, (byte) seconds, (unsigned int) milliseconds / 100);
         } else {
-            sprintf_P(timeString, PSTR("%02d:%02d"), (uint8_t) minutes, (uint8_t) seconds);
+            sprintf_P(timeString, PSTR("%02d:%02d"), (byte) minutes, (byte) seconds);
         }
     } else {
         if (withThirdData) {
-            sprintf_P(timeString, PSTR("%02d,%0hu"), (uint8_t) seconds, (uint16_t) milliseconds / 100);
+            sprintf_P(timeString, PSTR("%02d,%0hu"), (byte) seconds, (unsigned int) milliseconds / 100);
         } else {
-            sprintf_P(timeString, PSTR("%d"), (uint8_t) seconds);
+            sprintf_P(timeString, PSTR("%d"), (byte) seconds);
         }
     }
 }
 
-uint8_t utf8Ascii(uint8_t ascii)
+byte utf8Ascii(byte ascii)
 // Convert a single Character from UTF8 to Extended ASCII according to ISO 8859-1,
 // also called ISO Latin-1. Codes 128-159 contain the Microsoft Windows Latin-1
 // extended characters:
@@ -60,8 +60,8 @@ uint8_t utf8Ascii(uint8_t ascii)
 //
 // Return "0" if a byte has to be ignored.
 {
-    static uint8_t cPrev;
-    uint8_t c = '\0';
+    static byte cPrev;
+    byte c = '\0';
 
     if (ascii < 0x7f)   // Standard ASCII-set 0..0x7F, no conversion
     {
@@ -92,7 +92,7 @@ void utf8Ascii(char* s)
 // In place conversion UTF-8 string to Extended ASCII
 // The extended ASCII string is always shorter.
 {
-    uint8_t c;
+    byte c;
     char *cp = s;
 
     while (*s != '\0')

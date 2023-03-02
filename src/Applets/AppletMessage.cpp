@@ -38,7 +38,7 @@ void AppletMessage::printSerial() {
     DPRINT(F(", isLoop : ")); DPRINTLN(isLoopMessage);
 }
 
-void AppletMessage::addMessage(const char* messageToAdd, uint64_t durationSeconds) {
+void AppletMessage::addMessage(const char* messageToAdd, unsigned long durationSeconds) {
     if (messages.isFull()) {
         messages.pop();
     }
@@ -47,6 +47,11 @@ void AppletMessage::addMessage(const char* messageToAdd, uint64_t durationSecond
             {'\0'},
             durationSeconds
     };
+
+    if (strlen(messageToAdd) >= MAX_LENGTH_MESSAGE - 1) {
+        Serial.print(F("Message too long: ")); Serial.println(strlen(messageToAdd));
+        return;
+    }
 
     strcpy(messageSettings.message, messageToAdd);
     utf8Ascii(messageSettings.message);
@@ -60,8 +65,13 @@ void AppletMessage::popMessage() {
     DPRINT(F("New message: ")); DPRINTLN(newMessage.message); printSerial();
 
     strcpy(this->message, newMessage.message);
-    timer.setInterval(newMessage.durationSeconds * 1000, true);
+
+    timer.setExpired();
     isLoopMessage = newMessage.durationSeconds > 0;
+
+    if (isLoopMessage) {
+        timer.setInterval(newMessage.durationSeconds * 1000, true);
+    }
 }
 
 void AppletMessage::stopTimer() {

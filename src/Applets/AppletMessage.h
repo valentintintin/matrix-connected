@@ -8,7 +8,6 @@
 #include "MessageSettings.h"
 
 #define MAX_MESSAGES 10
-#define MAX_LENGTH_MESSAGE 255
 
 class AppletMessage : public Applet {
 
@@ -21,7 +20,7 @@ public:
     void draw(bool animationFinished) override;
     void printSerial() override;
 
-    void addMessage(const char* messageToAdd, uint64_t durationSeconds = 0);
+    void addMessage(const char* messageToAdd, unsigned long durationSeconds = 0);
 
 private:
     char message[MAX_LENGTH_MESSAGE]{};

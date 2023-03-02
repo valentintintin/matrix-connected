@@ -20,7 +20,7 @@ public:
     void draw(bool animationFinished) override;
     void printSerial() override;
 
-    void addSymbols(const char* symbols, uint64_t secondToCount);
+    void addSymbols(const char* symbols, unsigned long secondToCount);
 private:
     MD_MAX72XX::fontType_t* font;
 

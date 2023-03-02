@@ -35,7 +35,7 @@ void AppletStaticSymbols::printSerial() {
     DPRINT(F(", Has symbols: ")); DPRINTLN(hasSymbols);
 }
 
-void AppletStaticSymbols::addSymbols(const char* symbols, uint64_t durationSeconds) {
+void AppletStaticSymbols::addSymbols(const char* symbols, unsigned long durationSeconds) {
     if (messages.isFull()) {
         messages.pop();
     }
