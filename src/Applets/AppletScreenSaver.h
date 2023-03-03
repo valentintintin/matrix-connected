@@ -23,8 +23,8 @@ private:
 
     Timer timer;
     bool moveDiagonal = false;
-    unsigned int toGoColumn{}, toGoRow{};
-    unsigned int currentRow{}, currentColumn{};
+    uint16_t toGoColumn{}, toGoRow{};
+    uint16_t currentRow{}, currentColumn{};
 };
 
 

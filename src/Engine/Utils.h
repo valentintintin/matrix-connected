@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define VERSION 1.13
+#define VERSION 1.14
 #define AP_SSID "Horloge"
 
 #ifdef VALENTIN

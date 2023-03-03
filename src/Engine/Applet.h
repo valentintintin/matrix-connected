@@ -50,15 +50,15 @@ public:
         return type;
     }
 
-    inline unsigned int getStartColumn() const {
+    uint16_t getStartColumn() const {
         return startColumn;
     }
 
-    inline unsigned int getEndColumn() const {
+    uint16_t getEndColumn() const {
         return endColumn;
     }
 
-    inline unsigned int getNumberColumns() const {
+    uint16_t getNumberColumns() const {
         return getEndColumn() - getStartColumn() + 1;
     }
 
