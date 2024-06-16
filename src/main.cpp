@@ -46,6 +46,9 @@ System systemEngine(&parola, NUM_DEVICES, DONG, SOUND_PIN, LED_PIN, RESET_DISPLA
 
 WebServer webServer(&systemEngine);
 
+boolean syncEventTriggered = false; // True if a time even has been triggered
+NTPSyncEvent_t ntpEvent; // Last triggered event
+
 //void configModeCallback(AsyncWiFiManager *myWiFiManager) {
 //    screen.setLed(true);
 //    screen.setMainApplet(new AppletMessage(&screen, myWiFiManager->getConfigPortalSSID()));
@@ -69,7 +72,13 @@ void setup() {
 
     Serial.println(String(PSTR(AP_SSID)) + " " + WiFi.localIP().toString());
 
+    NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
+        ntpEvent = event;
+        syncEventTriggered = true;
+    });
+
     NTP.begin();
+    NTP.setNTPTimeout(30000);
     NTP.setTimeZone(1);
     NTP.setDayLight(true);
 
@@ -89,4 +98,13 @@ void setup() {
 
 void loop() {
     systemEngine.update();
+
+    if (syncEventTriggered) {
+        syncEventTriggered = false;
+
+        if (ntpEvent < 0 && NTP.getLastNTPSync() > 0) {
+            DPRINTLN("[NTP] Time Sync error: %d", ntpEvent);
+            ESP.restart();
+        }
+    }
 }
