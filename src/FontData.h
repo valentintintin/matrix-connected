@@ -366,6 +366,7 @@ MD_MAX72XX::fontType_t homeAssistant[] PROGMEM =
                 8, 3, 6, 12, 24, 48, 96, 193, 131, 	// 80     stairs_top
                 8, 0, 0, 60, 0, 60, 0, 0, 0, 	// 81     pause
                 8, 255, 137, 253, 129, 137, 253, 129, 255, 	// 82 calendar
+                8, 64, 124, 66, 195, 66, 124, 64, 0, 	// 83 bell
         };
 
 #endif //MATRIX_CONNECTED_FONTDATA_H
