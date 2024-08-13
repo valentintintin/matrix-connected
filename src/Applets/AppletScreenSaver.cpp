@@ -1,6 +1,6 @@
 #include "AppletScreenSaver.h"
 
-AppletScreenSaver::AppletScreenSaver(Orchestror* orchestror) : Applet(orchestror, PSTR("ScreenSaver"), SCREEN_SAVER), timer(25, true) {
+AppletScreenSaver::AppletScreenSaver(Orchestror* orchestror) : Applet(orchestror, PSTR("ScreenSaver"), SCREEN_SAVER), timer(50, true) {
 }
 
 void AppletScreenSaver::onInit() {

@@ -77,10 +77,8 @@ void setup() {
         syncEventTriggered = true;
     });
 
-    NTP.begin();
+    NTP.begin("192.168.1.254", 1, true, 0);
     NTP.setNTPTimeout(30000);
-    NTP.setTimeZone(1);
-    NTP.setDayLight(true);
 
     webServer.begin();
 
